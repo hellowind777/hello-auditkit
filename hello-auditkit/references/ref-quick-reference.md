@@ -34,18 +34,17 @@
 |---------|-------|-----------|
 | L1 Metadata | ~100 words | - |
 | L2 Body | 500 lines | +10% OK |
-| L3 Reference | 500 lines/file | +10% OK |
+| L3 Reference | **No official limit** | Evaluate by content |
 | L4 Scripts | **No limit** | - |
 | Memory files | 2000 lines | 3000 max |
 
-### Tiered Thresholds
+### Tiered Thresholds (SKILL.md body only)
 
 ```
 ≤500     → Ideal
 500-550  → OK (NOT an issue)
 550-625  → Info only
-625-750  → Warning
->750     → Severe
+>625     → Warning
 ```
 
 ---
@@ -86,7 +85,7 @@ Mark as Issue
 |-------|---------|--------|-------|
 | L1 | Metadata | Always | ~100 words |
 | L2 | Body | Triggered | <500 lines |
-| L3 | References | On demand | ≤500/file |
+| L3 | References | On demand | No official limit |
 | L4 | Scripts | Runtime | No limit |
 
 ---

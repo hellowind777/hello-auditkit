@@ -32,7 +32,7 @@
 ### 💡 最适合
 
 - ✅ **Prompt 工程师** 审查复杂的系统提示词
-- ✅ **Claude Code 用户** 审计 CLAUDE.md 记忆文件和 skills
+- ✅ **Codex CLI / Claude Code 用户** 审计记忆文件与 skills
 - ✅ **插件开发者** 验证 hooks、commands 和 MCP 配置
 - ✅ **团队** 建立 AI 配置的质量标准
 
@@ -112,32 +112,34 @@
 
 ### 前置条件
 
-- 已安装 Claude Code CLI
+- 已安装 Codex CLI 或 Claude Code
 - 要审计的目标配置文件
 
 ### 安装
 
-**步骤 1：复制 skill 到 Claude Code skills 目录**
+**步骤 1：复制 skill 到你的助手 skills 目录**
 
 ```bash
 # Windows (PowerShell)
+Copy-Item -Recurse "hello-auditkit" "$env:USERPROFILE\.codex\skills\"
 Copy-Item -Recurse "hello-auditkit" "$env:USERPROFILE\.claude\skills\"
 
 # macOS/Linux
+cp -r hello-auditkit ~/.codex/skills/
 cp -r hello-auditkit ~/.claude/skills/
 ```
 
 **步骤 2：验证安装**
 
 ```bash
-# 重启 Claude Code，检查 skill 是否可用
+# 重启 Codex CLI / Claude Code，检查 skill 是否可用
 # Skill 会在审计相关请求时自动触发
 ```
 
 **步骤 3：开始审计**
 
 ```bash
-# 在 Claude Code 中，直接请求审计：
+# 在 Codex CLI / Claude Code 中，直接请求审计：
 "审计我的 CLAUDE.md 文件"
 "检查这个 skill 的质量问题"
 "检查这个插件配置"
@@ -436,17 +438,18 @@ flowchart TD
 
 ### Skill 未触发
 
-**问题：** Claude Code 不识别审计请求
+**问题：** Codex CLI / Claude Code 不识别审计请求
 
 **解决方案：**
 ```bash
 # 1. 验证 skill 位置
+ls ~/.codex/skills/hello-auditkit/SKILL.md
 ls ~/.claude/skills/hello-auditkit/SKILL.md
 
 # 2. 检查 SKILL.md frontmatter 是否有效
 # name、description、version 字段必须存在
 
-# 3. 重启 Claude Code
+# 3. 重启 Codex CLI / Claude Code
 ```
 
 ---
@@ -590,8 +593,8 @@ ls ~/.claude/skills/hello-auditkit/SKILL.md
 ## 🙏 致谢
 
 **灵感来源：**
-- [Claude Code](https://github.com/anthropics/claude-code) by Anthropic — 本工具审计的 AI 编码助手
-- [Codex CLI](https://github.com/openai/codex) by OpenAI — AGENTS.md 格式参考
+- [Claude Code](https://github.com/anthropics/claude-code) by Anthropic — 本工具审计目标之一
+- [Codex CLI](https://github.com/openai/codex) by OpenAI — 本工具审计目标之一（并作为 AGENTS.md 格式参考）
 - [Gemini CLI](https://github.com/google-gemini/gemini-cli) by Google — GEMINI.md 格式参考
 
 **社区：**

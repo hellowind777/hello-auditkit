@@ -274,25 +274,37 @@ User may:
 
 ## Universal Size Thresholds
 
-> See `methodology-core.md` → Necessity Threshold for rationale.
+> Based on official Agent Skills specification (agentskills.io/specification)
 
-### Tiered Size Evaluation
+### SKILL.md Body (Official Requirement)
 
 | Range | Status | Severity |
 |-------|--------|----------|
 | ≤500 lines | Ideal | - |
 | 500-550 (≤10% over) | **NOT an issue** | - |
 | 550-625 (10-25% over) | Info only | Info |
-| 625-750 (>25% over) | Should fix | Warning |
-| >750 lines | Must fix | Severe |
+| >625 lines | Should optimize | Warning |
 
-### Component-Specific Limits
+> **Source**: "Keep your main `SKILL.md` under 500 lines. Move detailed reference material to separate files."
+
+### Reference Files (No Official Limit)
+
+**Official guidance**: "Keep individual reference files focused. Agents load these on demand, so smaller files mean less use of context."
+
+**Audit approach**: No hardcoded line limit. Evaluate based on content nature:
+- Does content have indivisible integrity? (e.g., professional knowledge that cannot be split without functional risk)
+- Would splitting cause loading omissions?
+- Is there obvious redundancy that can be trimmed?
+
+**Only flag if**: Content has clear redundancy or can be split without functional impact.
+
+### Component Summary
 
 | Component | Limit | Notes |
 |-----------|-------|-------|
 | L1 Metadata | ~100 words | Permanent context cost |
-| L2 Body | <500 lines | Self-sufficient for common cases |
-| L3 References | ≤500 lines/file | On-demand loading |
+| L2 Body (SKILL.md) | <500 lines | Official requirement |
+| L3 References | **No limit** | Evaluate by content nature |
 | L4 Scripts | No limit | Runtime only |
 
 ---
@@ -375,7 +387,7 @@ User may:
 
 ### Warnings (Suboptimal)
 
-- Size >625 lines (25%+ over recommended)
+- SKILL.md body >625 lines (applies to SKILL.md only, not references)
 - Missing "when to read" for references
 - Vague instructions ("do it well")
 - Inconsistent terminology without explanation
@@ -384,7 +396,7 @@ User may:
 
 ### Info (Suggestions)
 
-- Size 550-625 lines (10-25% over)
+- SKILL.md body 550-625 lines (10-25% over)
 - Could benefit from examples
 - Minor style variations
 - Optional fields missing

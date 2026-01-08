@@ -25,7 +25,7 @@ skill-name/
 │   ├── YAML frontmatter: name, description (required)
 │   └── Markdown body: instructions (required)
 ├── scripts/      - Executable code (runtime, NO size limit)
-├── references/   - Documentation (on-demand, ≤500 lines/file)
+├── references/   - Documentation (on-demand, no official limit)
 ├── assets/       - Output resources (not loaded)
 └── [custom]/     - Any other directories
 ```
@@ -86,8 +86,7 @@ description: This skill should be used when the user asks to "specific phrase", 
 |-------|--------|----------|
 | ≤500 lines | Ideal | - |
 | 500-625 (≤25% over) | Acceptable | - |
-| 625-750 (>25% over) | Should optimize | Warning |
-| >750 lines | Must split | Severe |
+| >625 lines | Should optimize | Warning |
 
 **When body too long, check in order:**
 1. Contains explanations AI knows? → Delete
@@ -104,8 +103,8 @@ description: This skill should be used when the user asks to "specific phrase", 
 
 | File Type | Loaded to Context | Line Limit |
 |-----------|-------------------|------------|
-| SKILL.md body | Yes | ≤500 lines |
-| references/*.md | Yes (on demand) | ≤500 lines |
+| SKILL.md body | Yes | <500 lines (official) |
+| references/*.md | Yes (on demand) | **No limit** |
 | scripts/*.py | **No** (runtime) | **No limit** |
 | scripts/*.sh | **No** (runtime) | **No limit** |
 
@@ -218,12 +217,18 @@ if __name__ == "__main__":
 
 **Purpose**: Documentation loaded on-demand
 
-| Range | Status | Severity |
-|-------|--------|----------|
-| ≤500 lines | Ideal | - |
-| 500-625 (≤25% over) | Acceptable | - |
-| 625-750 (>25% over) | Should optimize | Warning |
-| >750 lines | Must split | Severe |
+> **Official guidance**: "Keep individual reference files focused. Agents load these on demand, so smaller files mean less use of context." — No official line limit.
+
+### Size Evaluation (Content-Based)
+
+**No hardcoded limit.** Evaluate based on content nature:
+
+| Question | If Yes |
+|----------|--------|
+| Does content have indivisible integrity? | Do not flag size |
+| Would splitting cause functional risk? | Do not flag size |
+| Is there obvious redundancy? | Suggest trimming |
+| Can content be split without impact? | Suggest splitting |
 
 ### Requirements
 
@@ -304,7 +309,7 @@ See references/ for more information.
 | name >64 chars, description >1024 chars | Severe |
 | Description missing trigger conditions | Severe |
 | Trigger conditions in body instead of description | Warning |
-| Body >750 lines without optimization | Severe |
+| Body >625 lines without optimization | Warning |
 | References not mentioned in SKILL.md | Warning |
 | Deep reference nesting (>1 level) | Warning |
 | Script without error handling | Warning |

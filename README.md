@@ -32,7 +32,7 @@
 ### 💡 Best For
 
 - ✅ **Prompt Engineers** reviewing complex system prompts
-- ✅ **Claude Code Users** auditing CLAUDE.md memory files and skills
+- ✅ **Codex CLI / Claude Code Users** auditing memory files and skills
 - ✅ **Plugin Developers** validating hooks, commands, and MCP configurations
 - ✅ **Teams** establishing quality standards for AI configurations
 
@@ -112,32 +112,34 @@ Supports: en-US, zh-CN, zh-TW, ja-JP, ko-KR, es-ES, fr-FR, de-DE
 
 ### Prerequisites
 
-- Claude Code CLI installed
+- Codex CLI or Claude Code installed
 - Target configuration files to audit
 
 ### Installation
 
-**Step 1: Copy skill to Claude Code skills directory**
+**Step 1: Copy skill to your assistant's skills directory**
 
 ```bash
 # Windows (PowerShell)
+Copy-Item -Recurse "hello-auditkit" "$env:USERPROFILE\.codex\skills\"
 Copy-Item -Recurse "hello-auditkit" "$env:USERPROFILE\.claude\skills\"
 
 # macOS/Linux
+cp -r hello-auditkit ~/.codex/skills/
 cp -r hello-auditkit ~/.claude/skills/
 ```
 
 **Step 2: Verify installation**
 
 ```bash
-# Restart Claude Code and check skill is available
+# Restart Codex CLI / Claude Code and check skill is available
 # The skill should auto-trigger on audit-related requests
 ```
 
 **Step 3: Start auditing**
 
 ```bash
-# In Claude Code, simply request an audit:
+# In Codex CLI / Claude Code, simply request an audit:
 "Audit my CLAUDE.md file"
 "Review this skill for quality issues"
 "Check this plugin configuration"
@@ -436,17 +438,18 @@ If any check fails, the issue is filtered out.
 
 ### Skill Not Triggering
 
-**Problem:** Claude Code doesn't recognize audit requests
+**Problem:** Codex CLI / Claude Code doesn't recognize audit requests
 
 **Solution:**
 ```bash
 # 1. Verify skill location
+ls ~/.codex/skills/hello-auditkit/SKILL.md
 ls ~/.claude/skills/hello-auditkit/SKILL.md
 
 # 2. Check SKILL.md frontmatter is valid
 # name, description, version fields must be present
 
-# 3. Restart Claude Code
+# 3. Restart Codex CLI / Claude Code
 ```
 
 ---
@@ -590,8 +593,8 @@ To ensure "commercial use allowed + attribution required", this project adopts a
 ## 🙏 Acknowledgments
 
 **Inspired by:**
-- [Claude Code](https://github.com/anthropics/claude-code) by Anthropic — The AI coding assistant this tool audits
-- [Codex CLI](https://github.com/openai/codex) by OpenAI — AGENTS.md format reference
+- [Claude Code](https://github.com/anthropics/claude-code) by Anthropic — One target assistant this tool audits
+- [Codex CLI](https://github.com/openai/codex) by OpenAI — One target assistant this tool audits (and AGENTS.md format reference)
 - [Gemini CLI](https://github.com/google-gemini/gemini-cli) by Google — GEMINI.md format reference
 
 **Community:**

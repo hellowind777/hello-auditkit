@@ -89,7 +89,7 @@
 
 | Check | Expected | Severity |
 |-------|----------|----------|
-| No god files (>750 lines) | Yes | Warning |
+| No god files (SKILL.md >625 lines) | Yes | Warning |
 | No scattered rules (>3 files) | Yes | Warning |
 | No circular dependencies | Yes | Severe |
 | Separation of concerns | Yes | Warning |
@@ -104,7 +104,7 @@
 |-------|-------|-------------|
 | L1 (metadata) | ≤100 words | Warning (>500: Severe) |
 | L2 (body) | ≤500 lines | Warning (>625: Severe) |
-| L3 (references) | ≤500 lines each | Warning (>625: Severe) |
+| L3 (references) | **No official limit** | Evaluate by content nature |
 | L4 (scripts) | No limit | N/A |
 
 ### Content Placement

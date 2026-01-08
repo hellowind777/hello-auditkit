@@ -36,6 +36,7 @@ Comprehensive audit system for AI coding assistant configurations:
 Before marking ANY issue, verify:
 1. **Concrete Scenario** - Can describe specific failure?
 2. **Design Scope** - Within intended boundaries?
+2b. **Functional Capability** - Can it actually do what it claims? (Requires domain knowledge first)
 3. **Flaw vs Choice** - Unintentional error or valid choice?
 4. **Threshold Met** - Above quantified threshold?
 
@@ -53,15 +54,16 @@ Fix Priority: DELETE > MERGE > RESTRUCTURE > MODIFY > ADD
 - AI CANNOT: 3+ step inference, domain-specific variations
 - If <30% would misunderstand → exempt from issue
 
-### Principle 4: Size Tolerance
+### Principle 4: Size Tolerance (SKILL.md body only)
 
 | Range | Status |
 |-------|--------|
 | ≤500 lines | Ideal |
 | 500-550 (≤10% over) | **NOT an issue** |
 | 550-625 (10-25% over) | Info only |
-| 625-750 (>25% over) | Warning |
-| >750 lines | Severe |
+| >625 lines | Warning |
+
+> **Note**: Reference files have no official line limit. Evaluate based on content nature.
 
 ## Audit Execution
 
@@ -91,7 +93,7 @@ Composite    → Apply all + cross-*.md
 | Diagram & Flowchart | If exists: (1) node-text consistency, (2) all paths have endpoints, (3) no infinite loops, (4) decision branches complete | "Checked N diagrams, M consistency issues, K logic issues" |
 | Language Expression | (1) Ambiguity patterns (may/might/could without condition), (2) terminology consistency (same concept = same term), (3) spelling errors in identifiers/headings, (4) redundant content | "Found N ambiguity, M terminology, K spelling, L redundancy issues" |
 | Security & Compliance | Check for hardcoded secrets, paths, credentials; input validation rules | "Checked, N security issues" |
-| Size Thresholds | Count lines per file, apply tiered thresholds (≤500 ideal, >750 severe) | "File X: N lines (status)" |
+| Size Thresholds | SKILL.md body: apply tiered thresholds (≤500 ideal). Reference files: evaluate by content nature | "SKILL.md: N lines (status)" |
 | Rule Logic | If rules exist: (1) no conflicts, (2) no duplicates/semantic equivalents, (3) coverage complete, (4) optimization opportunities (DELETE > MERGE > MODIFY) | "Checked N rules: M conflicts, K duplicates, L gaps" |
 | Process Logic | If process/flow defined: (1) all scenarios covered, (2) main flow clear, (3) no dead loops, (4) no conflicting invocations | "Process: N scenarios, M flow issues" |
 | Output & i18n | If output format defined: (1) format specification complete, (2) language control correct (if i18n configured), (3) no hardcoded language-specific content | "Output: N format issues, M i18n issues" |
@@ -127,7 +129,7 @@ Composite    → Apply all + cross-*.md
 |----------------|--------|
 | Directory Validation | SKILL.md exists? Correct filename? |
 | Frontmatter | name, description, triggers present? |
-| Body Size | Apply tiered thresholds (≤500 ideal, >750 severe) |
+| Body Size | SKILL.md: ≤500 ideal, >625 warning. References: no limit, evaluate by content |
 | Script Integrity | Declared scripts exist? Imports valid? Shebang? Error handling? |
 | References | Has "when to read" guidance? |
 
@@ -153,12 +155,12 @@ Composite    → Apply all + cross-*.md
 | Rule Propagation | Global rules applied in local files? |
 | Conflict Detection | Same-file contradictions? Cross-file contradictions? |
 | Structural Redundancy | Repeated sections? Duplicate tables? Parallel content? → centralize |
-| Red Flags | God files (>750 lines)? Scattered rules (>3 files)? Circular deps? |
+| Red Flags | SKILL.md >625 lines? Scattered rules (>3 files)? Circular deps? |
 
 #### From `cross-progressive-loading.md`:
 | Check | Action |
 |-------|--------|
-| Content Level Audit | L1 ≤100 words? L2 ≤500 lines? L3 ≤500/file? |
+| Content Level Audit | L1 ≤100 words? L2 ≤500 lines? L3: evaluate by content nature |
 | Content Placement | Core workflow in L2? Edge cases in L3? |
 | Reference Guidance | Each reference has "when to read"? |
 | Anti-Patterns | Metadata bloat? Monolithic body? Essential in L3? |
@@ -173,9 +175,10 @@ Composite    → Apply all + cross-*.md
 
 ### Step 5: Issue Verification (4-Point Check)
 
-For each suspected issue, verify ALL 4 points:
+For each suspected issue, verify ALL points:
 1. **Concrete scenario** - Can describe specific failure?
 2. **Design scope** - Within intended boundaries?
+2b. **Functional capability** - Does implementation match claimed capability?
 3. **Flaw vs choice** - Unintentional error or valid design?
 4. **Threshold met** - Above quantified threshold?
 

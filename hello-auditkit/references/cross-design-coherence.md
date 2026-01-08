@@ -255,7 +255,7 @@ For each rule pair: check domain overlap → verify logical/constraint/value con
 
 | Red Flag | Indicator | Severity | Suggestion |
 |----------|-----------|----------|------------|
-| God file | >750 lines, multiple concerns | Warning | Split by responsibility |
+| God file | SKILL.md >625 lines, multiple concerns | Warning | Split by responsibility |
 | Scattered rules | Same rule in >3 files | Warning | Centralize |
 | Orphan components | Files not referenced | Info | Remove or integrate |
 | Circular deps | A→B→C→A | Severe | Break cycle |

@@ -34,7 +34,7 @@
 |-------|---------|-------------|------|-------|
 | **L1** | Metadata | Always | Permanent | ~100 words |
 | **L2** | Main body | When triggered | Session | <500 lines |
-| **L3** | References | On demand | Temporary | ≤500 lines/file |
+| **L3** | References | On demand | Temporary | **No official limit** |
 | **L4** | Scripts | Runtime only | Zero | No limit |
 
 ### L1: Metadata (Always Loaded)
@@ -140,7 +140,7 @@
 |--------|-------|--------|--------|
 | L1 size | X words | ≤100 | ✅/⚠️/❌ |
 | L2 size | Y lines | ≤500 | ✅/⚠️/❌ |
-| L3 size | Z lines | ≤500/file | ✅/⚠️ |
+| L3 size | Z lines | Evaluate by content | ✅/⚠️ |
 | "Always needed" in L3 | N files | 0 | ⚠️ if >0 |
 ```
 
@@ -312,7 +312,7 @@ For implementation, see `impl-notes.md`.
 |-------|----------|------|--------|--------|
 | L1 | frontmatter | X words | ≤100 | ✅/⚠️ |
 | L2 | SKILL.md | Y lines | ≤500 | ✅/⚠️ |
-| L3 | references/ | Z lines | ≤500/file | ✅/⚠️ |
+| L3 | references/ | Z lines | No official limit | ✅/⚠️ |
 | L4 | scripts/ | W lines | No limit | ✅ |
 
 ### Loading Efficiency
