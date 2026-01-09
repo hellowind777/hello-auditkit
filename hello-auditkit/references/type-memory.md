@@ -210,7 +210,7 @@ Files loaded and concatenated in order:
 
 ### Instruction Quality (LLM Best Practices)
 
-> **Full GPT-5.2 checks**: See `rules-universal.md` → LLM Prompting Best Practices (GPT-5.2)
+> **Full LLM checks**: See `rules-universal.md` → LLM Prompting Best Practices
 > **Detailed practices**: See `type-prompt.md` → LLM Prompting Best Practices
 
 | Check | Requirement | Severity |

@@ -1,5 +1,11 @@
 # Audit Methodology Core
 
+> **Dual Application**: The principles in this document serve TWO purposes:
+> 1. **As audit standards**: When auditing other skills, check if they follow these principles
+> 2. **As self-compliance**: This audit system itself follows these principles
+>
+> When auditing, verify that the audited content adheres to: Occam's Razor, AI Capability awareness, Fix Priority (DELETE > ADD), and necessity-based additions.
+
 ## Table of Contents
 
 - [4-Point Core Verification](#4-point-core-verification)
@@ -285,6 +291,21 @@ AI executors have strong contextual understanding and can infer meaning from con
 - [ ] Not already implied by existing content?
 
 **If ALL checked → Addition may be justified**
+
+### When ADD is Necessary (Exceptions)
+
+Despite the "ADD as last resort" principle, the following are considered **necessary additions**:
+
+| Category | Examples | Why Necessary |
+|----------|----------|---------------|
+| Official standards | API parameters, protocol specs, format definitions from official docs | Cannot be inferred, must be exact |
+| Safety-critical rules | Security constraints, data validation, access control | Risk of harm if omitted |
+| Necessary prohibition rules | "Do NOT" lists for scope control, feature creep prevention | Prevents unintended behavior |
+| Necessary clarifying examples | When rule is ambiguous without example | Reduces misinterpretation |
+
+**Key principle**: "Necessary" means removal would cause ≥30% misunderstanding or functional failure.
+
+**Applies equally to auditing**: When auditing other skills, do NOT flag necessary additions as violations of Occam's Razor.
 
 ---
 

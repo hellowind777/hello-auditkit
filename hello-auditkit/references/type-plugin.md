@@ -156,7 +156,7 @@ You'll receive a report.
 
 ### Command Prompt Quality
 
-> **Full GPT-5.2 checks**: See `rules-universal.md` → LLM Prompting Best Practices (GPT-5.2)
+> **Full LLM checks**: See `rules-universal.md` → LLM Prompting Best Practices
 
 | Check | Requirement | Severity |
 |-------|-------------|----------|
@@ -209,7 +209,7 @@ assistant: "[Response]"
 
 ### Agent Body Quality (LLM Best Practices)
 
-> **Full GPT-5.2 checks**: See `rules-universal.md` → LLM Prompting Best Practices (GPT-5.2)
+> **Full LLM checks**: See `rules-universal.md` → LLM Prompting Best Practices
 
 | Check | Requirement | Severity |
 |-------|-------------|----------|

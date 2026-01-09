@@ -274,7 +274,7 @@ See references/ for more information.
 ### AI Executor Awareness
 
 > **Full details**: See `methodology-core.md` → AI Capability Model
-> **Full GPT-5.2 checks**: See `rules-universal.md` → LLM Prompting Best Practices (GPT-5.2)
+> **Full LLM checks**: See `rules-universal.md` → LLM Prompting Best Practices
 
 | Check | Rule | Severity |
 |-------|------|----------|

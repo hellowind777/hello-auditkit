@@ -237,7 +237,7 @@
 | Consistent verb forms | Same verbs for actions | Warning |
 | Consistent formatting | Same style for elements | Warning |
 
-### Wording Patterns (GPT-5.2)
+### Wording Patterns (LLM Best Practices)
 
 | Check | Expected | Severity |
 |-------|----------|----------|

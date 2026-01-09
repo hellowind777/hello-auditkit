@@ -1,5 +1,11 @@
 # Universal Audit Rules
 
+> **Dual Application**: These rules serve as both:
+> 1. **Audit standards** for checking other skills
+> 2. **Quality standards** that audited content should follow
+>
+> Key principles audited content should follow: AI Executor Awareness, Conciseness, LLM Wording Patterns, and necessity-based content (see `methodology-core.md`).
+
 ## Table of Contents
 
 - [AI Executor Awareness](#ai-executor-awareness)
@@ -51,10 +57,11 @@ User may:
 
 > **Execution Required**: For ALL content containing AI instructions, verify each check below.
 > **Detailed guidance**: See `type-prompt.md` → LLM Prompting Best Practices
+> **Dynamic Verification**: Execute Step 0 in SKILL.md to fetch and cross-validate against latest GPT guides.
 
 **Applies to**: Prompts, Memory files, Skill bodies, Command bodies, Agent bodies, Hook prompts
 
-### LLM Prompting Best Practices (GPT-5.2)
+### LLM Prompting Best Practices
 
 | Check | Requirement | Severity | Applies To |
 |-------|-------------|----------|------------|
@@ -221,20 +228,37 @@ User may:
 | Consistent verb forms | Same verbs for same actions | Warning |
 | Consistent formatting | Same style for same elements | Warning |
 
-### Wording Patterns (GPT-5.2)
+### Wording Patterns (LLM Best Practices)
 
-> **Source**: GPT-5.2 Prompting Guide - specific wording recommendations
+> **Source**: Latest GPT Prompting Guide from [openai-cookbook/examples/gpt-5](https://github.com/openai/openai-cookbook/tree/main/examples/gpt-5)
+>
+> **Version Policy**: Always use the **latest version** as authoritative source. When multiple versions exist, prefer the highest version number (e.g., gpt-5.2 over gpt-5.1 over gpt-5).
 
-| Check | GPT-5.2 Recommended Pattern | Severity |
-|-------|----------------------------|----------|
-| Hedging language | Use "Based on provided context..." for uncertain claims, not absolute statements | Warning |
-| Avoid absolutes | Avoid "always", "guaranteed", "never" without qualification; use "typically", "generally" | Warning |
-| Scope constraint wording | Use "EXACTLY and ONLY what requested", explicit "Do NOT" lists | Warning |
-| Ambiguity handling wording | "If unclear: provide 1-3 clarifying questions OR 2-3 interpretations with assumption labels" | Warning |
-| No fabrication wording | Include "Never fabricate exact figures, line numbers, or external references" for factual content | Severe |
-| Verbosity constraint wording | Explicit limits like "≤N sentences", "≤N bullets", not vague "be concise" | Warning |
+#### Recommended Wording Patterns
 
-**Audit approach**: Check if instructions use GPT-5.2 recommended wording patterns. Flag when vague or absolute language is used where qualified language is appropriate.
+| Pattern | Recommended Wording | Purpose | Severity if Missing |
+|---------|---------------------|---------|---------------------|
+| Verbosity constraint | "≤N sentences", "≤N bullets", "≤N words" | Explicit length control | Warning |
+| Scope constraint | "EXACTLY and ONLY what requested" | Prevent feature creep | Warning |
+| Prohibition list | "Do NOT: [specific items]" | Clear boundaries | Warning |
+| Context grounding | "Based on provided context", "Use ONLY the text inside [Context]" | Prevent hallucination | Warning |
+| No fabrication | "Never fabricate exact figures, line numbers, or external references" | Factual accuracy | Severe |
+| Evidence check | "Before answering, verify that [X] is explicitly present in [Context]" | Grounding verification | Warning |
+| Ambiguity handling | "If unclear: provide 1-3 clarifying questions OR 2-3 interpretations with assumption labels" | Handle uncertainty | Warning |
+| Completion definition | Explicit stop condition or "done when" criteria | Prevent overthinking | Warning |
+| Hedging language | "Based on provided context...", "typically", "generally" | Avoid absolute claims | Warning |
+
+#### Wording Anti-Patterns (Official Warnings)
+
+| Anti-Pattern | Examples | Why Problematic | Severity |
+|--------------|----------|-----------------|----------|
+| Filler phrases | "Take a deep breath", "You are a world-class expert" | Modern LLMs treat as noise | Warning |
+| Vague verbosity | "Be concise", "Keep it short" | No measurable constraint | Warning |
+| Absolute claims | "Always", "Never", "Guaranteed" (without qualification) | Lacks grounding | Warning |
+| Maximize language | "Analyze everything", "Be thorough" | Causes overthinking/over-tool-calling | Warning |
+| Contradictory instructions | Conflicting rules in same prompt | Modern reasoning models waste tokens reconciling (more damaging than other models) | Severe |
+
+**Audit approach**: Check if instructions use LLM-recommended wording patterns. Flag when vague, absolute, or anti-pattern language is used where qualified language is appropriate.
 
 ---
 
@@ -387,6 +411,11 @@ User may:
 - Code examples showing syntax (not content)
 - Variable/function names
 - Log messages for debugging
+- **Official documentation/specification/standard content** (API parameters, protocol values, format definitions)
+- **Necessary prohibition rules** ("Do NOT" lists for scope control, security constraints)
+- **Necessary clarifying examples** (when rule is ambiguous without example)
+
+> **Key principle**: See `methodology-core.md` → "When ADD is Necessary" for full criteria.
 
 ---
 
@@ -394,7 +423,7 @@ User may:
 
 ### Fatal Issues (Blocks Execution)
 
-- Contradictory rules (A vs NOT A)
+- Contradictory rules (A vs NOT A) — **Warning**: Particularly damaging for modern reasoning models (wastes reasoning tokens attempting to reconcile)
 - Impossible conditions
 - Circular references (A→B→C→A)
 - Missing required fields

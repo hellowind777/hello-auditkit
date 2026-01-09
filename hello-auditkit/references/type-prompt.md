@@ -2,7 +2,7 @@
 
 > **Inherits**: All rules from `rules-universal.md`
 > **Execution Required**: Execute each check table below. Output evidence for each category.
-> **Source**: Based on GPT-5.2 Prompting Guide (openai-cookbook)
+> **Source**: Based on Latest GPT Prompting Guide (openai-cookbook/examples/gpt-5)
 
 ## Table of Contents
 
@@ -10,7 +10,8 @@
 - [Structure Validation](#structure-validation)
 - [Content Quality](#content-quality)
 - [LLM Prompting Best Practices](#llm-prompting-best-practices)
-- [GPT-5.2 Compliance Checks](#gpt-52-compliance-checks)
+- [Prompt Compliance Checks](#prompt-compliance-checks)
+- [LLM-Specific Warnings](#llm-specific-warnings)
 - [Common Issues](#common-issues)
 
 ---
@@ -25,6 +26,8 @@
 - Output format specification (structured extraction)
 - Ambiguity handling (clarification strategy)
 - High-risk self-check (verification steps)
+
+> **Dynamic Verification**: Before auditing, fetch latest GPT prompting guides per Step 0 in SKILL.md. Cross-validate built-in checks below against the latest guide and apply any new practices.
 
 ---
 
@@ -89,7 +92,7 @@ Before outputting legal/financial/security content:
 
 ## LLM Prompting Best Practices
 
-> **Source**: GPT-5.2 Prompting Guide
+> **Source**: Latest GPT Prompting Guide from [openai-cookbook/examples/gpt-5](https://github.com/openai/openai-cookbook/tree/main/examples/gpt-5)
 
 ### Core Principles
 
@@ -208,9 +211,9 @@ Before outputting, re-scan answer for:
 
 ---
 
-## GPT-5.2 Compliance Checks
+## Prompt Compliance Checks
 
-> **Execution Required**: For prompts targeting modern LLMs (GPT-5, Claude, etc.), verify these checks.
+> **Execution Required**: For prompts targeting modern LLMs (GPT-5+, Claude, Gemini, etc.), verify these checks.
 
 ### Verbosity Compliance
 
@@ -254,12 +257,37 @@ Before outputting, re-scan answer for:
 
 ---
 
+## LLM-Specific Warnings
+
+> **Source**: Latest troubleshooting and optimization guides from [openai-cookbook/examples/gpt-5](https://github.com/openai/openai-cookbook/tree/main/examples/gpt-5)
+
+### Official Warnings (From Troubleshooting Guide)
+
+| Issue | Official Warning | Severity |
+|-------|-----------------|----------|
+| Filler phrases | Modern LLMs treat "Take a deep breath", "You are a world-class expert" as noise | Warning |
+| Contradictory instructions | More damaging to reasoning models (wastes reasoning tokens reconciling) | Severe |
+| No clear completion definition | Causes overthinking - model keeps exploring without stop condition | Warning |
+| Maximize language | "Analyze everything", "Be thorough" causes over-tool-calling | Warning |
+| Overly deferential | In agentic settings, may need persistence instructions | Warning |
+
+### API Parameters Reference
+
+> **Note**: When prompts include parameter recommendations, verify against official values from the latest documentation.
+
+| Parameter | Valid Values | Purpose |
+|-----------|-------------|---------|
+| reasoning_effort | none \| minimal \| low \| medium \| high \| xhigh | Controls thinking depth |
+| verbosity | API parameter | Controls final answer length (separate from thinking) |
+
+---
+
 ## Common Issues
 
 ### Should Flag
 
-| Issue | Severity | GPT-5.2 Principle |
-|-------|----------|-------------------|
+| Issue | Severity | Principle |
+|-------|----------|-----------|
 | Contradictory instructions | Fatal | - |
 | Impossible constraints | Fatal | - |
 | Missing critical context | Fatal | - |
@@ -295,7 +323,7 @@ Before outputting, re-scan answer for:
 - [ ] No impossible constraints
 - [ ] Critical context present
 
-### Severe (GPT-5.2 Critical)
+### Severe (Critical)
 - [ ] Verbosity constraints specified (explicit length limits)
 - [ ] Scope boundaries defined (what IS and IS NOT in scope)
 - [ ] "Do not" constraints present (forbidden actions)
