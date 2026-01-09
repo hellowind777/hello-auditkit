@@ -415,8 +415,10 @@ List ALL issues with their recommended proposal:
 ## Output Rules
 
 ### File Creation
-- Report >300 lines → create separate file
-- Naming: `audit-{target}-{date}.md`
+
+- **Output**: Always create report file (not terminal output)
+- **Filename**: `审计报告-{target-name}-{YYYYMMDD}.md`
+- **Location**: Parent directory of audited target (e.g., audit `.../skills/hello-xxx` → output to `.../skills/`)
 
 ### No Issues Case
 When no issues found:

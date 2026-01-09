@@ -79,17 +79,16 @@ Fix Priority: DELETE > MERGE > RESTRUCTURE > MODIFY > ADD
 
 > **CRITICAL**: Each step below is MANDATORY. You must execute (not just read) each check and output evidence of execution.
 
-### Step 0: Fetch Latest Prompting Guide (For Prompt-Containing Content)
+### Step 0: Fetch Latest Prompting Guide
 
-**When auditing content containing AI instructions** (Prompts, Memory files, Skills, Plugins):
-
-1. Fetch latest GPT prompting guides from: `https://github.com/openai/openai-cookbook/tree/main/examples/gpt-5`
-2. Cross-validate with built-in checks in `type-prompt.md`
-3. Apply any new/updated practices found in the latest guide
+1. Access this directory page to get file list: `https://github.com/openai/openai-cookbook/tree/main/examples/gpt-5`
+2. Select the latest version prompting guide (e.g., `gpt-5-2_prompting_guide.ipynb` > `gpt-5-1_prompting_guide.ipynb` > `gpt-5_prompting_guide.ipynb`)
+3. Cross-validate with built-in checks in `type-prompt.md`
+4. Apply any new/updated practices found
 
 **Evidence Output**: Note guide version fetched and any new checks applied.
 
-**If WebFetch unavailable**: Use built-in checks, note "offline mode" in report.
+**If WebFetch fails**: Use built-in checks in `type-prompt.md`, note "offline mode - [error reason]" in report.
 
 ### Step 1: Detection & Classification
 
