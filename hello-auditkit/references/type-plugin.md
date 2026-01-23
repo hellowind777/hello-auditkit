@@ -1,83 +1,115 @@
-# Plugin Audit Rules
+# 插件审计规则
 
-> **Inherits**: All rules from `rules-universal.md`
-> **Execution Required**: Execute each check table below. Verify structure, paths, components (commands, agents, hooks, MCP, LSP).
+> **继承**：`rules-universal.md` 中的所有规则
+> **主要标准**：`ref-codex-skills-standard.md`（用于插件内的技能）
+> **次要标准**：`ref-gpt-prompting-standard.md`（用于命令/代理正文内容）
+> **执行要求**：执行以下每个检查表。验证结构、路径、组件（命令、代理、钩子、MCP、LSP）。
+>
+> **关键**：对于插件内的技能，应用 `ref-codex-skills-standard.md` 中的 Codex CLI Skills 标准。对于命令/代理正文内容（非脚本文本），应用 `ref-gpt-prompting-standard.md` 中的 GPT-5.2 提示词标准。
 
-## Table of Contents
+## 目录
 
-- [Overview](#overview)
-- [Plugin Structure](#plugin-structure)
-- [Plugin Manifest](#plugin-manifest)
-- [Commands Audit](#commands-audit)
-- [Agents Audit](#agents-audit)
-- [Hooks Audit](#hooks-audit)
-- [MCP Servers Audit](#mcp-servers-audit)
-- [LSP Servers Audit](#lsp-servers-audit)
-- [Common Issues](#common-issues)
+- [概述](#概述)
+- [审计执行](#审计执行)
+- [插件结构](#插件结构)
+- [插件清单](#插件清单)
+- [命令审计](#命令审计)
+- [代理审计](#代理审计)
+- [钩子审计](#钩子审计)
+- [MCP 服务器审计](#mcp-服务器审计)
+- [LSP 服务器审计](#lsp-服务器审计)
+- [常见问题](#常见问题)
 
 ---
 
-## Overview
+## 概述
 
-**Plugin identification**: Directory with `.claude-plugin/plugin.json`
+**插件识别**：包含 `.claude-plugin/plugin.json` 的目录
 
 ```
 plugin-name/
-├── .claude-plugin/plugin.json  (required)
-├── commands/                    (slash commands)
-├── agents/                      (subagent definitions)
-├── skills/                      (agent skills)
-├── hooks/hooks.json             (event handlers)
-├── .mcp.json                    (MCP servers)
-└── .lsp.json                    (LSP servers)
+├── .claude-plugin/plugin.json  (必需)
+├── commands/                    (斜杠命令)
+├── agents/                      (子代理定义)
+├── skills/                      (代理技能)
+├── hooks/hooks.json             (事件处理器)
+├── .mcp.json                    (MCP 服务器)
+└── .lsp.json                    (LSP 服务器)
 ```
 
-**CRITICAL**: Components MUST be at root level, NOT inside `.claude-plugin/`
+**关键**：组件必须在根级别，不能在 `.claude-plugin/` 内部
 
 ---
 
-## Plugin Structure
+## 审计执行
 
-### Critical Rules
+### 步骤 1：加载标准
 
-| Rule | Requirement | Severity |
-|------|-------------|----------|
-| Manifest location | `plugin.json` in `.claude-plugin/` | Fatal |
-| Component dirs | At plugin root, NOT in `.claude-plugin/` | Fatal |
-| Skill file naming | Exactly `SKILL.md` (case-sensitive) | Fatal |
-| Command/Agent format | `.md` files with YAML frontmatter | Severe |
-| Hooks format | Wrapper `{"hooks": {...}}` | Severe |
-| Path references | Use `${CLAUDE_PLUGIN_ROOT}` | Severe |
-| Naming | kebab-case for all names | Warning |
+读取并应用：
+- `ref-codex-skills-standard.md` 用于技能结构/frontmatter
+- `ref-gpt-prompting-standard.md` 用于命令/代理正文内容
 
-### Path Variables
+### 步骤 2：验证插件结构
 
-| Variable | Description | Available In |
-|----------|-------------|--------------|
-| `${CLAUDE_PLUGIN_ROOT}` | Plugin directory | Hooks, MCP, LSP, scripts |
-| `${CLAUDE_PROJECT_DIR}` | Project root | Hooks, scripts |
-| `${CLAUDE_ENV_FILE}` | Env file path | SessionStart hooks |
+检查 `.claude-plugin/plugin.json` 存在且组件在根级别。
 
-### Never Use
+### 步骤 3：审计每个组件
 
-- Hardcoded absolute paths (`/Users/name/...`)
-- Relative paths from working directory
-- Home shortcuts (`~/plugins/...`)
+应用相关章节的检查：
+- 命令 → 命令审计
+- 代理 → 代理审计
+- 技能 → 应用完整的 `type-skill.md` 检查
+- 钩子 → 钩子审计
+- MCP/LSP → MCP/LSP 服务器审计
+
+### 步骤 4：生成发现
+
+使用常见问题中的应标记/不应标记规则过滤问题。
 
 ---
 
-## Plugin Manifest
+## 插件结构
+
+### 关键规则
+
+| 规则 | 要求 | 严重性 |
+|------|------|--------|
+| 清单位置 | `plugin.json` 在 `.claude-plugin/` 中 | Fatal |
+| 组件目录 | 在插件根目录，不在 `.claude-plugin/` 中 | Fatal |
+| 技能文件命名 | 完全是 `SKILL.md`（区分大小写）| Fatal |
+| 命令/代理格式 | `.md` 文件带 YAML frontmatter | Severe |
+| 钩子格式 | 包装器 `{"hooks": {...}}` | Severe |
+| 路径引用 | 使用 `${CLAUDE_PLUGIN_ROOT}` | Severe |
+| 命名 | 所有名称使用 kebab-case | Warning |
+
+### 路径变量
+
+| 变量 | 描述 | 可用于 |
+|------|------|--------|
+| `${CLAUDE_PLUGIN_ROOT}` | 插件目录 | 钩子、MCP、LSP、脚本 |
+| `${CLAUDE_PROJECT_DIR}` | 项目根目录 | 钩子、脚本 |
+| `${CLAUDE_ENV_FILE}` | 环境文件路径 | SessionStart 钩子 |
+
+### 禁止使用
+
+- 硬编码绝对路径（`/Users/name/...`）
+- 从工作目录的相对路径
+- 主目录快捷方式（`~/plugins/...`）
+
+---
+
+## 插件清单
 
 ### plugin.json
 
-**Required:**
+**必需：**
 ```json
 {
   "name": "plugin-name"
 }
 ```
 
-**Recommended:**
+**推荐：**
 ```json
 {
   "name": "plugin-name",
@@ -86,21 +118,21 @@ plugin-name/
 }
 ```
 
-### Validation Rules
+### 验证规则
 
-| Field | Rule | Severity |
-|-------|------|----------|
-| name | Required, non-empty, kebab-case | Fatal |
-| name | ≤50 characters | Warning |
-| version | Semver format (X.Y.Z) | Warning |
-| description | ≤200 characters | Warning |
-| Custom paths | Relative, start with `./` | Severe |
+| 字段 | 规则 | 严重性 |
+|------|------|--------|
+| name | 必需、非空、kebab-case | Fatal |
+| name | ≤50 字符 | Warning |
+| version | Semver 格式（X.Y.Z）| Warning |
+| description | ≤200 字符 | Warning |
+| 自定义路径 | 相对路径，以 `./` 开头 | Severe |
 
 ---
 
-## Commands Audit
+## 命令审计
 
-**Location**: `commands/*.md`
+**位置**：`commands/*.md`
 
 ### Frontmatter
 
@@ -113,66 +145,66 @@ model: sonnet
 ---
 ```
 
-| Field | Rule | Severity |
-|-------|------|----------|
-| description | Recommended, ≤100 chars | Info |
-| allowed-tools | Valid tool names | Severe |
-| model | `sonnet`, `opus`, `haiku` | Severe |
+| 字段 | 规则 | 严重性 |
+|------|------|--------|
+| description | 推荐，≤100 字符 | Info |
+| allowed-tools | 有效的工具名 | Severe |
+| model | `sonnet`、`opus`、`haiku` | Severe |
 
-### allowed-tools Formats
+### allowed-tools 格式
 
 ```yaml
-# Single tool
+# 单个工具
 allowed-tools: Read
 
-# Multiple (string)
+# 多个（字符串）
 allowed-tools: Read, Write, Edit
 
-# Multiple (array)
+# 多个（数组）
 allowed-tools:
   - Read
   - Bash(git:*)
 
-# MCP tools
+# MCP 工具
 allowed-tools: ["mcp__server__tool"]
 ```
 
-### Content Rule
+### 内容规则
 
-**Commands are instructions FOR Claude, not messages TO users.**
+**命令是给 Claude 的指令，不是给用户的消息。**
 
-✅ **Correct:**
+✅ **正确：**
 ```markdown
 Review this code for vulnerabilities:
 - SQL injection, XSS attacks
 Provide line numbers and severity.
 ```
 
-❌ **Incorrect:**
+❌ **错误：**
 ```markdown
 This command will review your code.
 You'll receive a report.
 ```
 
-### Command Prompt Quality
+### 命令提示词质量
 
-> **Full LLM checks**: See `rules-universal.md` → LLM Prompting Best Practices
+> **完整 LLM 检查**：见 `rules-universal.md` → LLM 提示词最佳实践
 
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Clear task | Specific, actionable instruction | Severe |
-| Verbosity constraint | Output length specified | Warning |
-| Scope boundaries | What NOT to do | Warning |
-| Freedom level match | Constraints fit task fragility | Warning |
-| No AI-known content | Don't explain standard concepts | Info |
-| Tool preference | Prefer tools over internal knowledge | Warning |
-| Agentic updates | Brief updates at major phases (if agentic) | Warning |
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 清晰任务 | 具体、可操作的指令 | Severe |
+| 详尽约束 | 指定输出长度 | Warning |
+| 范围边界 | 不要做什么 | Warning |
+| 自由度匹配 | 约束适合任务脆弱性 | Warning |
+| 无 AI 已知内容 | 不解释标准概念 | Info |
+| 工具偏好 | 优先使用工具而非内部知识 | Warning |
+| 代理式更新 | 主要阶段的简短更新（如是代理式）| Warning |
 
 ---
 
-## Agents Audit
+## 代理审计
 
-**Location**: `agents/*.md`
+**位置**：`agents/*.md`
 
 ### Frontmatter
 
@@ -185,14 +217,14 @@ model: sonnet
 ---
 ```
 
-| Field | Required | Rule | Severity |
-|-------|----------|------|----------|
-| name | Yes | kebab-case, ≤50 chars | Severe |
-| description | Yes | Include when to use, ≤500 chars | Severe |
-| tools | No | Valid tool names | Warning |
-| model | No | `inherit`, `sonnet`, `opus`, `haiku` | Warning |
+| 字段 | 必需 | 规则 | 严重性 |
+|------|------|------|--------|
+| name | 是 | kebab-case，≤50 字符 | Severe |
+| description | 是 | 包含何时使用，≤500 字符 | Severe |
+| tools | 否 | 有效的工具名 | Warning |
+| model | 否 | `inherit`、`sonnet`、`opus`、`haiku` | Warning |
 
-### Description Pattern
+### 描述模式
 
 ```yaml
 description: Use this agent when [conditions]. Examples:
@@ -207,31 +239,31 @@ assistant: "[Response]"
 </example>
 ```
 
-### Agent Body Quality (LLM Best Practices)
+### 代理正文质量（LLM 最佳实践）
 
-> **Full LLM checks**: See `rules-universal.md` → LLM Prompting Best Practices
+> **完整 LLM 检查**：见 `rules-universal.md` → LLM 提示词最佳实践
 
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Clear role | Specific agent purpose | Severe |
-| Trigger conditions | In description, not body | Severe |
-| Verbosity constraints | Output expectations | Warning |
-| Scope discipline | What agent should NOT do | Warning |
-| Tool usage guidance | When to use which tools | Info |
-| Freedom level match | Constraint level fits task | Warning |
-| Conciseness | No redundant explanations | Warning |
-| Tool preference | Prefer tools over internal knowledge | Warning |
-| Agentic updates | Brief updates at major phases, concrete outcomes | Warning |
-| No task expansion | Don't expand beyond user request | Warning |
-| Long-context outline | For >10k tokens: outline, restatement | Warning |
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 清晰角色 | 具体的代理目的 | Severe |
+| 触发条件 | 在描述中，不在正文中 | Severe |
+| 详尽约束 | 输出期望 | Warning |
+| 范围纪律 | 代理不应该做什么 | Warning |
+| 工具使用指导 | 何时使用哪些工具 | Info |
+| 自由度匹配 | 约束级别适合任务 | Warning |
+| 简洁性 | 无冗余解释 | Warning |
+| 工具偏好 | 优先使用工具而非内部知识 | Warning |
+| 代理式更新 | 主要阶段的简短更新，具体结果 | Warning |
+| 禁止任务扩展 | 不超出用户请求扩展 | Warning |
+| 长上下文大纲 | >10k token：大纲、重述 | Warning |
 
 ---
 
-## Hooks Audit
+## 钩子审计
 
-### hooks.json Format (Plugin Context)
+### hooks.json 格式（插件上下文）
 
-**MUST use wrapper format:**
+**必须使用包装器格式：**
 ```json
 {
   "hooks": {
@@ -242,25 +274,25 @@ assistant: "[Response]"
 }
 ```
 
-**NOT direct format (that's for settings.json):**
+**不是直接格式（那是给 settings.json 的）：**
 ```json
 {
-  "PreToolUse": [...]  // Wrong for plugins
+  "PreToolUse": [...]  // 插件中错误
 }
 ```
 
-### Hook Events
+### 钩子事件
 
-| Event | Description | Matcher |
-|-------|-------------|---------|
-| PreToolUse | Before tool, can approve/deny/modify | Yes |
-| PostToolUse | After tool succeeds | Yes |
-| Stop | Main agent considers stopping | Yes |
-| SubagentStop | Subagent considers stopping | Yes |
-| SessionStart | Session begins | Yes |
-| Notification | On notification | Yes |
+| 事件 | 描述 | 匹配器 |
+|------|------|--------|
+| PreToolUse | 工具前，可批准/拒绝/修改 | 是 |
+| PostToolUse | 工具成功后 | 是 |
+| Stop | 主代理考虑停止 | 是 |
+| SubagentStop | 子代理考虑停止 | 是 |
+| SessionStart | 会话开始 | 是 |
+| Notification | 收到通知时 | 是 |
 
-### Hook Configuration
+### 钩子配置
 
 ```json
 {
@@ -281,36 +313,36 @@ assistant: "[Response]"
 }
 ```
 
-### Hook Types
+### 钩子类型
 
-| Type | Description | Use Case |
-|------|-------------|----------|
-| `command` | Execute shell | Scripts, validation |
-| `prompt` | LLM evaluation | Complex decisions |
-| `agent` | Agentic verifier | Multi-step verification |
+| 类型 | 描述 | 用例 |
+|------|------|------|
+| `command` | 执行 shell | 脚本、验证 |
+| `prompt` | LLM 评估 | 复杂决策 |
+| `agent` | 代理式验证器 | 多步验证 |
 
-### Matcher Patterns
+### 匹配器模式
 
-| Pattern | Matches |
-|---------|---------|
-| `Write` | Only Write |
-| `Edit\|Write` | Edit or Write |
-| `Notebook.*` | All Notebook tools |
-| `*` or `""` | All tools |
-| `mcp__server__.*` | All from MCP server |
+| 模式 | 匹配 |
+|------|------|
+| `Write` | 仅 Write |
+| `Edit\|Write` | Edit 或 Write |
+| `Notebook.*` | 所有 Notebook 工具 |
+| `*` 或 `""` | 所有工具 |
+| `mcp__server__.*` | MCP 服务器的所有工具 |
 
-### Hook Scripts
+### 钩子脚本
 
-**Bash:**
+**Bash：**
 ```bash
 #!/bin/bash
 set -euo pipefail
-input=$(cat)  # Read JSON from stdin
+input=$(cat)  # 从 stdin 读取 JSON
 tool_name=$(echo "$input" | jq -r '.tool_name')
-echo '{"continue": true}'  # Output JSON
+echo '{"continue": true}'  # 输出 JSON
 ```
 
-**Python:**
+**Python：**
 ```python
 #!/usr/bin/env python3
 import sys, json
@@ -318,23 +350,23 @@ input_data = json.load(sys.stdin)
 print(json.dumps({"continue": True}))
 ```
 
-| Check | Rule | Severity |
-|-------|------|----------|
-| Shebang | Present | Warning |
-| Input | Read JSON from stdin | Severe |
-| Output | Valid JSON to stdout | Severe |
-| Exit codes | 0=success, 2=blocking | Warning |
-| Paths | Use `${CLAUDE_PLUGIN_ROOT}` | Severe |
+| 检查 | 规则 | 严重性 |
+|------|------|--------|
+| Shebang | 存在 | Warning |
+| 输入 | 从 stdin 读取 JSON | Severe |
+| 输出 | 向 stdout 输出有效 JSON | Severe |
+| 退出码 | 0=成功，2=阻止 | Warning |
+| 路径 | 使用 `${CLAUDE_PLUGIN_ROOT}` | Severe |
 
 ---
 
-## MCP Servers Audit
+## MCP 服务器审计
 
-**Location**: `.mcp.json`
+**位置**：`.mcp.json`
 
-### Formats
+### 格式
 
-**stdio (local):**
+**stdio（本地）：**
 ```json
 {
   "server-name": {
@@ -345,7 +377,7 @@ print(json.dumps({"continue": True}))
 }
 ```
 
-**HTTP:**
+**HTTP：**
 ```json
 {
   "api-server": {
@@ -356,22 +388,22 @@ print(json.dumps({"continue": True}))
 }
 ```
 
-### Validation
+### 验证
 
-| Check | Rule | Severity |
-|-------|------|----------|
-| Valid JSON | Parseable | Fatal |
-| Server name | Unique, descriptive | Warning |
-| command | Required for stdio | Severe |
-| url | Required for http | Severe |
-| Paths | Use `${CLAUDE_PLUGIN_ROOT}` | Severe |
-| Secrets | Use env variables, not hardcoded | Severe |
+| 检查 | 规则 | 严重性 |
+|------|------|--------|
+| 有效 JSON | 可解析 | Fatal |
+| 服务器名 | 唯一、描述性 | Warning |
+| command | stdio 必需 | Severe |
+| url | http 必需 | Severe |
+| 路径 | 使用 `${CLAUDE_PLUGIN_ROOT}` | Severe |
+| 秘密 | 使用环境变量，不硬编码 | Severe |
 
 ---
 
-## LSP Servers Audit
+## LSP 服务器审计
 
-**Location**: `.lsp.json`
+**位置**：`.lsp.json`
 
 ```json
 {
@@ -386,38 +418,38 @@ print(json.dumps({"continue": True}))
 }
 ```
 
-| Check | Rule | Severity |
-|-------|------|----------|
-| command | Required | Severe |
-| extensionToLanguage | Required, valid mapping | Severe |
-| transport | `stdio` or `socket` | Warning |
-| Valid JSON | Parseable | Fatal |
+| 检查 | 规则 | 严重性 |
+|------|------|--------|
+| command | 必需 | Severe |
+| extensionToLanguage | 必需，有效映射 | Severe |
+| transport | `stdio` 或 `socket` | Warning |
+| 有效 JSON | 可解析 | Fatal |
 
 ---
 
-## Common Issues
+## 常见问题
 
-### Should Flag
+### 应标记
 
-| Issue | Severity |
-|-------|----------|
-| Missing `.claude-plugin/plugin.json` | Fatal |
-| plugin.json not in `.claude-plugin/` | Fatal |
-| Components inside `.claude-plugin/` | Fatal |
-| Skill not named `SKILL.md` | Fatal |
-| hooks.json missing wrapper | Severe |
-| Hardcoded paths | Severe |
-| Referenced component doesn't exist | Severe |
-| Invalid JSON in config | Fatal |
-| Hardcoded secrets | Severe |
-| Invalid tool/event names | Severe |
+| 问题 | 严重性 |
+|------|--------|
+| 缺少 `.claude-plugin/plugin.json` | Fatal |
+| plugin.json 不在 `.claude-plugin/` 中 | Fatal |
+| 组件在 `.claude-plugin/` 内部 | Fatal |
+| 技能未命名为 `SKILL.md` | Fatal |
+| hooks.json 缺少包装器 | Severe |
+| 硬编码路径 | Severe |
+| 引用的组件不存在 | Severe |
+| 配置中无效 JSON | Fatal |
+| 硬编码秘密 | Severe |
+| 无效的工具/事件名 | Severe |
 
-### Should NOT Flag
+### 不应标记
 
-| Pattern | Reason |
-|---------|--------|
-| Missing optional components | Not all plugins need all types |
-| Custom directory names | Valid if configured |
-| Style variations | Design choice |
-| Missing README.md | Optional |
-| Different organization | Design choice |
+| 模式 | 原因 |
+|------|------|
+| 缺少可选组件 | 不是所有插件都需要所有类型 |
+| 自定义目录名 | 如配置则有效 |
+| 风格变化 | 设计选择 |
+| 缺少 README.md | 可选 |
+| 不同的组织方式 | 设计选择 |

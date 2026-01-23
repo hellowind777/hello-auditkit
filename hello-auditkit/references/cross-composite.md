@@ -1,359 +1,376 @@
-# Composite System Audit Rules
+# 复合系统审计规则
 
-> **Inherits**: All rules from `rules-universal.md`
-> **Requires**: Type-specific rules from `type-*.md`
-> **Execution Required**: Execute each check table below. Verify cross-component references, terminology consistency, rule layering, and script integrity.
+> **继承**：`rules-universal.md` 中的所有规则
+> **需要**：`type-*.md` 中的类型特定规则
+> **执行要求**：执行以下每个检查表。验证跨组件引用、术语一致性、规则分层和脚本完整性。
 
-## Table of Contents
+## 目录
 
-- [Overview](#overview)
-- [Composite Types](#composite-types)
-- [Cross-Component Consistency](#cross-component-consistency)
-- [Reference Integrity](#reference-integrity)
-- [Rule Layering](#rule-layering)
-- [Coverage Scan](#coverage-scan)
-- [Script Quality](#script-quality)
-- [Design Requirements Review](#design-requirements-review)
-- [Common Issues](#common-issues)
+- [概述](#概述)
+- [复合类型](#复合类型)
+- [跨组件一致性](#跨组件一致性)
+- [引用完整性](#引用完整性)
+- [规则分层](#规则分层)
+- [覆盖扫描](#覆盖扫描)
+- [脚本质量](#脚本质量)
+- [设计需求审查](#设计需求审查)
+- [常见问题](#常见问题)
 
 ---
 
-## Overview
+## 概述
 
-**Composite systems** combine multiple components that must work together cohesively.
+**复合系统**组合多个必须协同工作的组件。
 
-### Audit Approach
+### 审计方法
 
 ```
-Composite System Audit Flow:
+复合系统审计流程：
 
-1. Identify Components
-   ├── Memory file (AGENTS.md/CLAUDE.md/GEMINI.md)
-   ├── Skills (find all SKILL.md)
-   ├── Plugin structure (.claude-plugin/)
-   └── Other components (scripts, hooks, etc.)
+1. 识别组件
+   ├── 记忆文件 (AGENTS.md/CLAUDE.md/GEMINI.md)
+   ├── 技能 (查找所有 SKILL.md)
+   ├── 插件结构 (.claude-plugin/)
+   └── 其他组件 (脚本、钩子等)
 
-2. Individual Audits
-   └── Apply type-specific rules to each component
+2. 单独审计
+   └── 对每个组件应用类型特定规则
 
-3. Cross-Cutting Audits (THIS FILE)
-   ├── Reference integrity
-   ├── Terminology consistency
-   ├── Rule layering
-   └── Coverage verification
+3. 横切审计（本文件）
+   ├── 引用完整性
+   ├── 术语一致性
+   ├── 规则分层
+   └── 覆盖验证
 
-4. Integration Verification
-   └── Components work together without conflicts
+4. 集成验证
+   └── 组件协同工作无冲突
 ```
 
 ---
 
-## Composite Types
+## 复合类型
 
-| Type | Components | Entry Point |
-|------|------------|-------------|
-| **Claude Composite** | CLAUDE.md + skills/ | CLAUDE.md |
-| **Codex Composite** | AGENTS.md + skills/ | AGENTS.md |
-| **Gemini Composite** | GEMINI.md + skills/ | GEMINI.md |
-| **Plugin Composite** | .claude-plugin/ + all components | plugin.json |
-| **Multi-Memory** | Multiple memory files + skills | Most specific |
+| 类型 | 组件 | 入口点 |
+|------|------|--------|
+| **Claude 复合** | CLAUDE.md + skills/ | CLAUDE.md |
+| **Codex 复合** | AGENTS.md + skills/ | AGENTS.md |
+| **Gemini 复合** | GEMINI.md + skills/ | GEMINI.md |
+| **插件复合** | .claude-plugin/ + 所有组件 | plugin.json |
+| **多记忆** | 多个记忆文件 + 技能 | 最具体的 |
 
-### Structure Validation
+### 结构验证
 
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Memory file exists | At least one memory file | Severe |
-| skills/ directory | Contains valid SKILL.md files | Severe |
-| Script references | All referenced scripts exist | Fatal |
-| Directory structure | Logical organization | Warning |
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 记忆文件存在 | 至少一个记忆文件 | Severe |
+| skills/ 目录 | 包含有效的 SKILL.md 文件 | Severe |
+| 脚本引用 | 所有引用的脚本存在 | Fatal |
+| 目录结构 | 逻辑组织 | Warning |
 
-### Main Rule File Structure (AGENTS.md/CLAUDE.md)
+### 主规则文件结构 (AGENTS.md/CLAUDE.md)
 
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Bootstrap comments | lang, encoding, version, architecture | Info |
-| Core sections present | Global rules, routing, phase skeleton | Severe |
-| Section order | Logical flow (global → routing → phases) | Warning |
-| Skills reference table | Complete and accurate | Severe |
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 引导注释 | lang、encoding、version、architecture | Info |
+| 核心章节存在 | 全局规则、路由、阶段骨架 | Severe |
+| 章节顺序 | 逻辑流程（全局 → 路由 → 阶段）| Warning |
+| 技能引用表 | 完整且准确 | Severe |
 
-**Core Sections for Main Rule File:**
+**主规则文件的核心章节：**
 
-| Section | Purpose | Required |
-|---------|---------|----------|
-| Global Rules | Apply to all phases | Yes |
-| Routing Mechanism | Path decision logic | Yes (if multi-path) |
-| Phase Skeleton | High-level phase flow | Yes |
-| Skills Reference Table | List all skill references | Recommended |
-| Auxiliary Scripts | Runtime dependencies | If scripts exist |
-
----
-
-## Cross-Component Consistency
-
-### Reference Validation
-
-**Check all cross-references:**
-
-| Reference Type | Check | Severity |
-|----------------|-------|----------|
-| Memory → Skill | Referenced skills exist | Severe |
-| Skill → Skill | Inter-skill references valid | Warning |
-| Agent → Skill | Referenced skills exist | Severe |
-| Hook → Script | Referenced scripts exist | Fatal |
-| Any → File | File references exist | Severe |
-
-### Terminology Consistency
-
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Same concept = same term | Across all files | Warning |
-| Component names match refs | Names consistent | Warning |
-| No conflicting terminology | Without explanation | Warning |
-
-**Example:**
-```
-Memory file: "task processing"
-Skill A: "job handling"      ← Warning: inconsistent
-Skill B: "task processing"   ← OK: consistent
-```
-
-### Naming Conventions
-
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Consistent numbering | R1/R2/R3 or 1.1/1.2/1.3 | Warning |
-| No numbering gaps | Sequential | Warning |
-| Format consistency | Same format across files | Warning |
-
-### Output Format Consistency
-
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Format defined centrally | One source of truth | Warning |
-| Components follow format | Consistent application | Warning |
-| Format documented | Clear specification | Info |
+| 章节 | 用途 | 必需 |
+|------|------|------|
+| 全局规则 | 适用于所有阶段 | 是 |
+| 路由机制 | 路径决策逻辑 | 是（如多路径）|
+| 阶段骨架 | 高层阶段流程 | 是 |
+| 技能引用表 | 列出所有技能引用 | 推荐 |
+| 辅助脚本 | 运行时依赖 | 如有脚本 |
 
 ---
 
-## Reference Integrity
+## 跨组件一致性
 
-### Existence Checks
+### 引用验证
 
-| Referenced Item | Must Exist | Severity |
-|-----------------|------------|----------|
-| Skills in memory file | Yes | Severe |
-| Scripts in hooks | Yes | Fatal |
-| Files in imports | Yes | Fatal |
-| Agents in commands | Yes | Severe |
+**检查所有跨引用：**
 
-### Circular Dependency Detection
+| 引用类型 | 检查 | 严重性 |
+|----------|------|--------|
+| 记忆 → 技能 | 引用的技能存在 | Severe |
+| 技能 → 技能 | 技能间引用有效 | Warning |
+| 代理 → 技能 | 引用的技能存在 | Severe |
+| 钩子 → 脚本 | 引用的脚本存在 | Fatal |
+| 任意 → 文件 | 文件引用存在 | Severe |
 
+### 术语一致性
+
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 同概念 = 同术语 | 所有文件中 | Warning |
+| 组件名称匹配引用 | 名称一致 | Warning |
+| 无冲突术语 | 无解释的情况下 | Warning |
+
+**示例：**
 ```
-A → B → C → A  ← FATAL: Circular dependency
+记忆文件: "task processing"
+技能 A: "job handling"      ← Warning: 不一致
+技能 B: "task processing"   ← OK: 一致
 ```
 
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| No circular refs | A→B→C→A pattern | Fatal |
-| Dependency graph acyclic | Can be topologically sorted | Fatal |
+### 命名约定
 
-### Anchor/Link Validation
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 一致编号 | R1/R2/R3 或 1.1/1.2/1.3 | Warning |
+| 无编号缺口 | 连续 | Warning |
+| 格式一致性 | 所有文件相同格式 | Warning |
 
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| #anchor links valid | Target exists | Severe |
-| File references valid | Target file exists | Severe |
-| Path format correct | Portable paths | Warning |
+### 输出格式一致性
+
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 格式集中定义 | 单一信息源 | Warning |
+| 组件遵循格式 | 一致应用 | Warning |
+| 格式有文档 | 清晰规范 | Info |
 
 ---
 
-## Rule Layering
+## 引用完整性
 
-### Hierarchy Principle
+### 存在性检查
+
+| 被引用项 | 必须存在 | 严重性 |
+|----------|----------|--------|
+| 记忆文件中的技能 | 是 | Severe |
+| 钩子中的脚本 | 是 | Fatal |
+| 导入中的文件 | 是 | Fatal |
+| 命令中的代理 | 是 | Severe |
+
+### 循环依赖检测
 
 ```
-Global Rules (Memory File)
-    ↓ (inherited by)
-Local Rules (Skills/Components)
-    ↓ (can override with)
-Component-Specific Rules
+A → B → C → A  ← FATAL: 循环依赖
 ```
 
-### Layering Checks
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 无循环引用 | A→B→C→A 模式 | Fatal |
+| 依赖图无环 | 可拓扑排序 | Fatal |
 
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Global rules in memory file | Not scattered in skills | Warning |
-| Local rules in components | Component-specific only | Warning |
-| No misplaced rules | Rules at correct level | Warning |
-| Override documented | If local overrides global | Info |
+### 锚点/链接验证
 
-### Inheritance Verification
-
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Global inherited | Skills follow memory file rules | Warning |
-| Conflicts resolved | No contradictory rules | Severe |
-| Override explicit | Local override is intentional | Info |
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| #anchor 链接有效 | 目标存在 | Severe |
+| 文件引用有效 | 目标文件存在 | Severe |
+| 路径格式正确 | 可移植路径 | Warning |
 
 ---
 
-## Coverage Scan
+## 规则分层
 
-### Phase Implementation
+### 层次原则
 
-For systems with defined phases:
+```
+全局规则（记忆文件）
+    ↓（被继承）
+本地规则（技能/组件）
+    ↓（可覆盖）
+组件特定规则
+```
 
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| All phases implemented | Each phase has SKILL.md | Fatal |
-| Key steps documented | Critical steps have rules | Severe |
-| No orphan implementations | All skills referenced | Warning |
+### 分层检查
 
-### Routing Path Verification
+<rule_layering_analysis>
+规则分层判断需要分析：
+- 全局规则是否在记忆文件中，而非分散在技能中？
+- 本地规则是否限于组件特定内容？
+- 是否有放错位置的规则（应在其他层级）？
+- 当本地覆盖全局时，是否有明确文档？
+</rule_layering_analysis>
 
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| All paths have rules | Each routing path covered | Fatal |
-| No dead-end paths | All paths lead to endpoints | Fatal |
-| Path conditions clear | Unambiguous routing | Severe |
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 全局规则在记忆文件 | 不分散在技能中 | Warning |
+| 本地规则在组件中 | 仅组件特定 | Warning |
+| 无放错位置的规则 | 规则在正确层级 | Warning |
+| 覆盖有文档 | 如本地覆盖全局 | Info |
 
-### Capability Coverage
+### 继承验证
 
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Declared → Implemented | All declared capabilities exist | Severe |
-| No orphan skills | All skills are reachable | Info |
-| Triggers don't conflict | Skills have distinct triggers | Warning |
-
----
-
-## Script Quality
-
-> **Detailed steps**: See `type-skill.md` → Scripts Audit → Script Integrity Verification
-
-**Applies to**: All scripts in composite system
-
-### Script Integrity Checklist
-
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Declared scripts exist | All listed scripts present | Severe |
-| Import targets exist | All imported modules present | Fatal |
-| No circular imports | Acyclic dependency graph | Severe |
-| Shebang present | `#!/bin/bash` or `#!/usr/bin/env python3` | Warning |
-| Error handling | `set -euo pipefail` (bash) or try/except (python) | Warning |
-| No hardcoded secrets | Use env variables | Severe |
-| Path references | Use relative paths or env variables | Severe |
-| External packages listed | In requirements.txt or docs | Warning |
-
-### Script Type Classification
-
-| Type | Purpose | Document? |
-|------|---------|-----------|
-| **Runtime** | Called during skill execution | Yes (required) |
-| **Dev tools** | Development/debugging only | No |
-| **Internal helpers** | Imported by other scripts | Optional |
-
-### Function Merge Check
-
-If declared script doesn't exist:
-1. Read other scripts' source code
-2. Check if function merged into another file
-3. If merged → Document update needed, not missing issue
-4. If truly missing → Severe issue
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 全局被继承 | 技能遵循记忆文件规则 | Warning |
+| 冲突已解决 | 无矛盾规则 | Severe |
+| 覆盖明确 | 本地覆盖是有意的 | Info |
 
 ---
 
-## Design Requirements Review
+## 覆盖扫描
 
-### When to Apply
+### 阶段实现
 
-**Optional add-on** when user provides design requirements with audit target.
+对于有定义阶段的系统：
 
-### Gap Analysis
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 所有阶段已实现 | 每个阶段有 SKILL.md | Fatal |
+| 关键步骤有文档 | 关键步骤有规则 | Severe |
+| 无孤立实现 | 所有技能被引用 | Warning |
 
-| Check | Assessment | Severity |
-|-------|------------|----------|
-| Core functionality | All features implemented? | Severe |
-| Feature completeness | Partial vs full | Severe |
-| Scope creep | Unintended features added? | Warning |
-| Missing capabilities | Gaps vs intent | Severe |
-| Over-engineering | More complex than needed? | Warning |
+### 路由路径验证
 
-### Alignment Verification
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 所有路径有规则 | 每个路由路径覆盖 | Fatal |
+| 无死胡同路径 | 所有路径到达端点 | Fatal |
+| 路径条件清晰 | 无歧义路由 | Severe |
 
-For each design goal:
-- Is there a corresponding component?
-- Does it fully address the goal?
-- Are there gaps between intent and implementation?
-- Are there deviations from purpose?
+### 能力覆盖
 
-### Trigger Condition Review
-
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Triggers match intent | Cover intended scenarios | Warning |
-| No missing triggers | All scenarios covered | Warning |
-| No unintended triggers | No false positives | Warning |
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 声明 → 实现 | 所有声明的能力存在 | Severe |
+| 无孤立技能 | 所有技能可达 | Info |
+| 触发条件不冲突 | 技能有不同触发条件 | Warning |
 
 ---
 
-## Common Issues
+## 脚本质量
 
-### Should Flag
+> **详细步骤**：见 `type-skill.md` → 脚本审计 → 脚本完整性验证
 
-| Issue | Severity |
-|-------|----------|
-| Memory file contradicts skill | Severe |
-| Referenced scripts don't exist | Fatal |
-| Overlapping triggers without differentiation | Warning |
-| Broken cross-file references | Severe |
-| Inconsistent naming | Warning |
-| Circular dependencies | Fatal |
-| Global rule scattered in skills | Warning |
-| Phase defined but not implemented | Fatal |
-| Script without error handling | Warning |
-| Import dependencies missing | Fatal |
+**适用于**：复合系统中的所有脚本
 
-### Should NOT Flag
+### 脚本完整性检查清单
 
-| Pattern | Reason |
-|---------|--------|
-| Different detail levels | Normal variation |
-| Reasonable organizational choices | Design choice |
-| Style variations within components | Acceptable |
-| Optional scripts not present | Optional |
-| Different structure than examples | Valid if working |
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 声明的脚本存在 | 所有列出的脚本存在 | Severe |
+| 导入目标存在 | 所有导入的模块存在 | Fatal |
+| 无循环导入 | 无环依赖图 | Severe |
+| Shebang 存在 | `#!/bin/bash` 或 `#!/usr/bin/env python3` | Warning |
+| 错误处理 | `set -euo pipefail` (bash) 或 try/except (python) | Warning |
+| 无硬编码秘密 | 使用环境变量 | Severe |
+| 路径引用 | 使用相对路径或环境变量 | Severe |
+| 外部包已列出 | 在 requirements.txt 或文档中 | Warning |
+
+### 脚本类型分类
+
+| 类型 | 用途 | 文档？ |
+|------|------|--------|
+| **运行时** | 技能执行期间调用 | 是（必需）|
+| **开发工具** | 仅开发/调试 | 否 |
+| **内部辅助** | 被其他脚本导入 | 可选 |
+
+### 函数合并检查
+
+如果声明的脚本不存在：
+1. 读取其他脚本的源代码
+2. 检查函数是否合并到其他文件
+3. 如果已合并 → 需要更新文档，不是缺失问题
+4. 如果真的缺失 → Severe 问题
 
 ---
 
-## Audit Output Format
+## 设计需求审查
 
-### Cross-Component Section
+### 何时应用
+
+**可选附加**：用户提供设计需求与审计目标时。
+
+### 差距分析
+
+<design_gap_analysis>
+"实现是否匹配设计意图"的推理过程：
+- 核心功能：所有声明的功能都实现了吗？
+- 功能完整性：部分实现还是完整实现？
+- 范围蔓延：是否添加了非预期功能？
+- 缺失能力：与原始意图相比存在什么差距？
+- 过度工程：是否比需要的更复杂？
+</design_gap_analysis>
+
+| 检查 | 评估 | 严重性 |
+|------|------|--------|
+| 核心功能 | 所有功能已实现？ | Severe |
+| 功能完整性 | 部分 vs 完整 | Severe |
+| 范围蔓延 | 添加了非预期功能？ | Warning |
+| 缺失能力 | 与意图的差距 | Severe |
+| 过度工程 | 比需要的更复杂？ | Warning |
+
+### 对齐验证
+
+对于每个设计目标：
+- 是否有对应的组件？
+- 是否完全满足目标？
+- 意图与实现之间是否有差距？
+- 是否有偏离目的？
+
+### 触发条件审查
+
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 触发条件匹配意图 | 覆盖预期场景 | Warning |
+| 无缺失触发条件 | 所有场景覆盖 | Warning |
+| 无非预期触发条件 | 无误报 | Warning |
+
+---
+
+## 常见问题
+
+### 应标记
+
+| 问题 | 严重性 |
+|------|--------|
+| 记忆文件与技能矛盾 | Severe |
+| 引用的脚本不存在 | Fatal |
+| 重叠的触发条件无区分 | Warning |
+| 断裂的跨文件引用 | Severe |
+| 不一致命名 | Warning |
+| 循环依赖 | Fatal |
+| 全局规则分散在技能中 | Warning |
+| 阶段已定义但未实现 | Fatal |
+| 脚本无错误处理 | Warning |
+| 导入依赖缺失 | Fatal |
+
+### 不应标记
+
+| 模式 | 原因 |
+|------|------|
+| 不同的详细程度 | 正常变化 |
+| 合理的组织选择 | 设计选择 |
+| 组件内的风格变化 | 可接受 |
+| 可选脚本不存在 | 可选 |
+| 与示例结构不同 | 如能工作则有效 |
+
+---
+
+## 审计输出格式
+
+### 跨组件章节
 
 ```markdown
-## Cross-Component Analysis
+## 跨组件分析
 
-### Reference Integrity
-| Source | Target | Status |
-|--------|--------|--------|
-| CLAUDE.md:45 | skills/audit | ✅ Exists |
-| skill-a → skill-b | Reference | ✅ Valid |
+### 引用完整性
+| 来源 | 目标 | 状态 |
+|------|------|------|
+| CLAUDE.md:45 | skills/audit | ✅ 存在 |
+| skill-a → skill-b | 引用 | ✅ 有效 |
 
-### Terminology Consistency
-| Concept | Terms Used | Status |
-|---------|------------|--------|
-| Processing | task, job | ⚠️ Inconsistent |
+### 术语一致性
+| 概念 | 使用的术语 | 状态 |
+|------|------------|------|
+| 处理 | task, job | ⚠️ 不一致 |
 
-### Rule Layering
-| Rule | Location | Level | Status |
-|------|----------|-------|--------|
-| Output format | CLAUDE.md | Global | ✅ Correct |
-| Validation | skill-a | Local | ✅ Correct |
+### 规则分层
+| 规则 | 位置 | 层级 | 状态 |
+|------|------|------|------|
+| 输出格式 | CLAUDE.md | 全局 | ✅ 正确 |
+| 验证 | skill-a | 本地 | ✅ 正确 |
 
-### Coverage
-| Capability | Declared | Implemented | Status |
-|------------|----------|-------------|--------|
-| Audit | Yes | Yes | ✅ Complete |
+### 覆盖
+| 能力 | 已声明 | 已实现 | 状态 |
+|------|--------|--------|------|
+| 审计 | 是 | 是 | ✅ 完整 |
 ```

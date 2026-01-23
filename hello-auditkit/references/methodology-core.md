@@ -1,385 +1,464 @@
-# Audit Methodology Core
+# 审计方法论核心
 
-> **Triple Application**: The principles in this document serve THREE purposes:
-> 1. **As audit standards**: When auditing other skills, check if they follow these principles
-> 2. **As self-compliance**: This audit system itself follows these principles
-> 3. **As fix validation**: ALL fix proposals MUST pass these principles before being output
+> **三重应用**：本文档中的原则服务于三个目的：
+> 1. **作为审计标准**：审计其他技能时，检查它们是否遵循这些原则
+> 2. **作为自我合规**：本审计系统自身遵循这些原则
+> 3. **作为修复验证**：所有修复建议在输出前必须通过这些原则验证
 >
-> **CRITICAL - Fix Proposal Validation**:
-> Before outputting ANY fix proposal, verify:
-> - Is ADD truly necessary? (Could DELETE/MERGE/MODIFY achieve the goal?)
-> - Can AI infer from existing examples/context? (If yes, do NOT add explicit rules)
-> - Is this adding hardcoded content where AI should judge based on context? (If yes, do NOT add)
-> - Does the original design already convey intent through examples/structure? (If yes, do NOT add redundant rules)
+> **关键 - 修复建议验证**：
+> 在输出任何修复建议之前，验证：
+> - ADD 真的必要吗？（DELETE/MERGE/MODIFY 能否达到目标？）
+> - AI 能从现有示例/上下文推断吗？（如果能，不要添加显式规则）
+> - 这是否在 AI 应根据上下文判断的地方添加硬编码内容？（如果是，不要添加）
+> - 原始设计是否已通过示例/结构传达意图？（如果是，不要添加冗余规则）
 >
-> When auditing, verify that the audited content adheres to: Occam's Razor, AI Capability awareness, Fix Priority (DELETE > ADD), and necessity-based additions.
+> 审计时，验证被审计内容是否遵循：奥卡姆剃刀、AI 能力意识、修复优先级（DELETE > ADD）以及基于必要性的添加。
 
-## Table of Contents
+## 目录
 
-- [5-Point Core Verification](#5-point-core-verification)
-- [Occam's Razor: Correct Application](#occams-razor-correct-application)
-- [Conciseness Principle](#conciseness-principle)
-- [Freedom Level Matching](#freedom-level-matching)
-- [AI Capability Model](#ai-capability-model)
-- [Fix Priority Hierarchy](#fix-priority-hierarchy)
-- [Necessity Threshold](#necessity-threshold)
-
----
-
-## 5-Point Core Verification
-
-**Before marking ANY issue, it MUST pass all 5 checks:**
-
-### Check 1: Concrete Scenario Test
-
-| Question | Pass Criteria |
-|----------|---------------|
-| Can you construct a specific scenario where this causes clear negative consequences? | Must describe complete execution steps and failure point |
-| If NO → Not an issue, discard | |
-| If YES → Continue to Check 2 | |
-
-### Check 2: Design Scope Verification
-
-| Question | Pass Criteria |
-|----------|---------------|
-| Is this scenario within the design scope? | Exclude extreme edge cases, theoretical possibilities |
-| If NO → Not an issue, discard | |
-| If YES → Continue to Check 3 | |
-
-**CRITICAL**: Before applying any audit rule, first understand the audited content's:
-- **Core purpose**: What is it designed to do?
-- **Design principles**: What trade-offs did the author make?
-- **Domain characteristics**: Does the domain require special considerations?
-
-Only then judge whether the audit rule applies to this specific content.
-
-### Check 3: Functional Capability Audit
-
-**CRITICAL PREREQUISITE**: Before evaluating functional capability, the auditor MUST first understand the target domain. For domain-specific skills, acquire domain knowledge (via WebSearch, references, or user input) before assessment.
-
-**For any content that generates outputs or performs tasks, evaluate whether it truly has the capability to achieve its stated purpose:**
-
-| Question | Potential Issue If |
-|----------|-------------------|
-| Does it understand the domain's core concepts? | Uses fixed templates without domain understanding |
-| Can it handle complex/varied scenarios? | Only works for simple/fixed cases |
-| Are outputs dynamically generated based on input? | Hardcoded values, fixed structures, preset results |
-| Does it have necessary knowledge to make decisions? | Missing knowledge base or decision logic |
-| Can it adapt to different requirements? | One-size-fits-all approach |
-
-**Universal Anti-Patterns (apply to any content type):**
-
-| Anti-Pattern | Indicator | Impact |
-|--------------|-----------|--------|
-| Fixed template | Same output structure regardless of input | Cannot handle varied scenarios |
-| Hardcoded values | Preset numbers, positions, or results | Incorrect for different inputs |
-| Missing calculation/logic | Results preset instead of computed | Fundamentally wrong outputs |
-| Oversimplified model | Linear/simple logic for complex domain | Cannot represent real complexity |
-| Lack of domain knowledge | No understanding of domain concepts | Outputs lack accuracy |
-
-**Audit approach**:
-1. First understand what the content claims to do (from description/purpose)
-2. Then evaluate whether its implementation can actually achieve that
-3. If gap exists between claimed capability and actual capability → Flag as functional deficiency
-
-### Check 4: Design Intent Judgment
-
-| Question | Pass Criteria |
-|----------|---------------|
-| Is this a design flaw or a design choice? | Can you find a reasonable design rationale? |
-| If design choice (intentional) → Not an issue, discard | |
-| If design flaw (unintentional error) → Continue to Check 5 | |
-| **Note**: Missing necessary constraints is NOT a design choice | If ≥30% would misunderstand, still flag |
-
-### Check 5: Negative Consequence Assessment
-
-| Issue Type | Threshold |
-|------------|-----------|
-| Fatal | Execution completely fails (cannot continue) |
-| Severe | ≥60% of executors make serious errors |
-| Semantic Ambiguity | ≥3 reasonable but conflicting interpretations |
-| Expression Standards | ≥40% misunderstand OR reading time +40% |
-| Structure | Content scattered in ≥4 locations OR change requires ≥4 syncs |
-| Robustness | ≥20% failure rate in common scenarios |
-| Optimization | ≥30% improvement AND <10% cost |
-
-If unclear or below threshold → Discard
-If clear and meets threshold → Mark as issue
-
-### Verification Transparency
-
-- Record which checks passed/failed for each suspected issue
-- If >80% of a category discarded → reconsider scan criteria
-- Final output must include: "Scanned X, verified Y, discarded Z"
+- [五点核心验证](#五点核心验证)
+- [奥卡姆剃刀：正确应用](#奥卡姆剃刀正确应用)
+- [简洁性原则](#简洁性原则)
+- [自由度匹配](#自由度匹配)
+- [AI 能力模型](#ai-能力模型)
+- [修复优先级层次](#修复优先级层次)
+- [必要性阈值](#必要性阈值)
 
 ---
 
-## Occam's Razor: Correct Application
+## 五点核心验证
 
-### Common Misunderstanding
+**标记任何问题之前，必须通过全部 5 项检查：**
 
-❌ **Wrong**: "Fewer is always better" (minimalism for its own sake)
-❌ **Wrong**: "Add rules to prevent all possible issues" (defensive over-engineering)
+### 检查 1：具体场景测试
 
-✅ **Correct**: "Do not multiply entities **beyond necessity**" — the key is judging NECESSITY
+| 问题 | 通过标准 |
+|------|----------|
+| 能否构造一个具体场景，其中这会导致明确的负面后果？ | 必须描述完整的执行步骤和失败点 |
+| 如果否 → 不是问题，丢弃 | |
+| 如果是 → 继续检查 2 | |
 
-### The Problem: Addition Bias
+### 检查 2：设计范围验证
 
-Most audit systems suffer from **addition bias**:
-- "Add a rule for X"
-- "Add a constraint to prevent Y"
-- "Add an example showing Z"
+| 问题 | 通过标准 |
+|------|----------|
+| 这个场景在设计范围内吗？ | 排除极端边缘情况、理论可能性 |
+| 如果否 → 不是问题，丢弃 | |
+| 如果是 → 继续检查 3 | |
 
-This leads to **bloated, over-constrained systems**.
+**关键**：应用任何审计规则之前，首先理解被审计内容的：
+- **核心目的**：它被设计用来做什么？
+- **设计原则**：作者做了哪些权衡？
+- **领域特性**：该领域是否需要特殊考量？
 
-### The Correct Approach
+只有这样才能判断审计规则是否适用于这个特定内容。
 
-**Fix the structure, not the symptoms.**
+### 检查 3：功能能力审计
 
-Fix Priority (highest to lowest):
+**关键前提**：在评估功能能力之前，审计者必须先理解目标领域。对于领域特定技能，在评估前获取领域知识（通过 WebSearch、参考资料或用户输入）。
+
+<functional_capability_analysis>
+"是否有能力实现其目的"的推理过程：
+- 首先理解内容声称要做什么（从描述/目的）
+- 评估实现是否真的能达成目标
+- 检查反模式：固定模板、硬编码值、缺失逻辑
+- 如果声称能力与实际能力之间存在差距 → 标记为缺陷
+</functional_capability_analysis>
+
+**对于任何生成输出或执行任务的内容，评估它是否真正有能力实现其声明的目的：**
+
+| 问题 | 潜在问题情况 |
+|------|-------------|
+| 它理解领域的核心概念吗？ | 使用固定模板而没有领域理解 |
+| 它能处理复杂/多变的场景吗？ | 只对简单/固定情况有效 |
+| 输出是基于输入动态生成的吗？ | 硬编码值、固定结构、预设结果 |
+| 它有做决策所需的知识吗？ | 缺少知识库或决策逻辑 |
+| 它能适应不同的需求吗？ | 一刀切的方法 |
+
+**通用反模式（适用于任何内容类型）：**
+
+| 反模式 | 指示器 | 影响 |
+|--------|--------|------|
+| 固定模板 | 无论输入如何，输出结构相同 | 无法处理多变场景 |
+| 硬编码值 | 预设的数字、位置或结果 | 对不同输入不正确 |
+| 缺少计算/逻辑 | 结果是预设的而非计算得出 | 输出根本错误 |
+| 过度简化模型 | 对复杂领域使用线性/简单逻辑 | 无法表示真实复杂性 |
+| 缺乏领域知识 | 不理解领域概念 | 输出缺乏准确性 |
+
+**审计方法**：
+1. 首先理解内容声称要做什么（从描述/目的）
+2. 然后评估其实现是否真的能达成目标
+3. 如果声称能力与实际能力之间存在差距 → 标记为功能缺陷
+
+### 检查 4：设计意图判断
+
+<design_intent_analysis>
+"设计缺陷 vs 设计选择"的推理过程：
+- 首先理解作者的设计意图和上下文
+- 寻找合理的设计理由
+- 考虑该选择在其领域/场景中是否合理
+- 区分"有意为之"和"无意遗漏"
+</design_intent_analysis>
+
+| 问题 | 通过标准 |
+|------|----------|
+| 这是设计缺陷还是设计选择？ | 能否找到合理的设计理由？ |
+| 如果是设计选择（有意为之）→ 不是问题，丢弃 | |
+| 如果是设计缺陷（无意错误）→ 继续检查 5 | |
+| **注意**：缺少必要约束不是设计选择 | 如果 ≥30% 会误解，仍然标记 |
+
+### 检查 5：负面后果评估
+
+| 问题类型 | 阈值 |
+|----------|------|
+| 致命 | 执行完全失败（无法继续） |
+| 严重 | ≥60% 的执行者会犯严重错误 |
+| 语义歧义 | ≥3 种合理但冲突的解释 |
+| 表达标准 | ≥40% 误解 或 阅读时间 +40% |
+| 结构 | 内容分散在 ≥4 处 或 修改需要 ≥4 次同步 |
+| 健壮性 | 常见场景中 ≥20% 失败率 |
+| 优化 | ≥30% 改进 且 <10% 成本 |
+
+如果不清楚或低于阈值 → 丢弃
+如果清楚且达到阈值 → 标记为问题
+
+### 验证透明性
+
+- 为每个疑似问题记录哪些检查通过/失败
+- 如果某类别 >80% 被丢弃 → 重新考虑扫描标准
+- 最终输出必须包含："扫描 X 个，验证 Y 个，丢弃 Z 个"
+
+### 引用验证原则（防幻觉）
+
+> **关键**：审计报告中的每一个问题引用必须可验证。此原则防止"幻觉"——生成不存在的内容或错误的行号。
+
+<citation_verification_principle>
+**引用验证原则**：
+1. 每个问题的"当前内容"必须从工具读取结果中直接提取
+2. 行号必须是精确的，不是估计值
+3. 如果无法验证引用 → 删除该问题
+4. 禁止根据"印象"或"应该有"生成问题
+</citation_verification_principle>
+
+| 验证项 | 要求 | 失败后果 |
+|--------|------|----------|
+| 内容存在 | 引用的文本确实存在于源文件中 | 删除问题 |
+| 行号准确 | 行号与实际位置一致 | 修正或删除 |
+| 上下文匹配 | 引用的上下文与问题描述一致 | 修正描述 |
+
+**执行点**：见 `workflow-execution.md` → 步骤 7B（引用回查验证）
+
+---
+
+## 奥卡姆剃刀：正确应用
+
+<necessity_reasoning>
+奥卡姆剃刀的核心是判断"必要性"：
+- 不是"越少越好"的极简主义
+- 不是"防止所有问题"的过度工程
+- 关键问题：这个添加/约束真的必要吗？
+- 必要性标准：移除是否会导致 ≥30% 误解或功能失败？
+</necessity_reasoning>
+
+### 常见误解
+
+❌ **错误**："越少越好"（为极简而极简）
+❌ **错误**："添加规则防止所有可能问题"（防御性过度工程）
+
+✅ **正确**："如非**必要**，勿增实体" — 关键是判断必要性
+
+### 问题：添加偏见
+
+大多数审计系统存在**添加偏见**：
+- "为 X 添加规则"
+- "添加约束防止 Y"
+- "添加示例展示 Z"
+
+这导致**臃肿、过度约束的系统**。
+
+### 正确方法
+
+**修复结构，而非症状。**
+
+修复优先级（从高到低）：
 ```
-1. DELETE    - Remove unnecessary content
-2. MERGE     - Combine redundant elements
-3. RESTRUCTURE - Reorganize for clarity
-4. MODIFY    - Change existing content
-5. ADD       - Only if absolutely necessary (LAST RESORT)
+1. DELETE（删除）    - 移除不必要的内容
+2. MERGE（合并）     - 合并冗余元素
+3. RESTRUCTURE（重构）- 重新组织以提高清晰度
+4. MODIFY（修改）    - 修改现有内容
+5. ADD（添加）       - 仅在绝对必要时（最后手段）
 ```
 
 ---
 
-## Conciseness Principle
+## 简洁性原则
 
-> "Context window is a shared resource."
+> "上下文窗口是共享资源。"
 
-### Core Concept
+### 核心概念
 
-Context window is shared among: system prompts, conversation history, skill metadata, user requests, and tool outputs.
+上下文窗口在以下内容之间共享：系统提示词、对话历史、技能元数据、用户请求和工具输出。
 
-### Self-Check Questions
+### 自检问题
 
-Before adding ANY content, ask:
-1. "Does AI really need this explanation?"
-2. "Is this worth its token cost?"
-3. "Can a concise example replace lengthy text?"
+添加任何内容之前，问：
+1. "AI 真的需要这个解释吗？"
+2. "这值得它的 token 成本吗？"
+3. "简洁的示例能否替代冗长的文本？"
 
-### Information Placement
+### 信息放置
 
-| Rule | Requirement | Severity |
-|------|-------------|----------|
-| Single source of truth | Info exists in ONE place only | Warning |
-| No duplication | Same content not in body AND references | Warning |
-| Prefer examples | Concise examples over lengthy explanations | Info |
-| Remove AI-known content | Don't explain what AI already knows | Warning |
+| 规则 | 要求 | 严重性 |
+|------|------|--------|
+| 单一信息源 | 信息只存在于一个地方 | Warning |
+| 无重复 | 相同内容不同时在正文和参考文件中 | Warning |
+| 偏好示例 | 简洁示例优于冗长解释 | Info |
+| 移除 AI 已知内容 | 不解释 AI 已经知道的 | Warning |
 
-### Applies To
+### 适用于
 
-- **Prompts**: No over-explanation of common concepts
-- **Memory files**: Concise, actionable instructions
-- **Skills**: Body ≤500 lines, use references for details
-- **Plugins**: Component descriptions brief, details in bodies
-- **Commands/Agents**: Descriptions include triggers, not implementation
-
----
-
-## Freedom Level Matching
-
-### Core Concept
-
-Match constraint specificity to task fragility and variability.
-
-### Freedom Levels
-
-| Level | When to Apply | Implementation | Example |
-|-------|---------------|----------------|---------|
-| **High** | Multiple valid approaches, context-dependent | Text instructions | Code style suggestions |
-| **Medium** | Preferred patterns exist, some variation OK | Pseudo-code, parameterized | API call templates |
-| **Low** | Fragile operations, consistency critical | Specific scripts, few params | PDF form filling |
-
-### Analogy
-
-AI explores a path:
-- **Narrow cliff bridge** → Needs specific guardrails (low freedom)
-- **Open field** → Multiple routes acceptable (high freedom)
-
-### Audit Checks
-
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Fragile ops with high freedom | Should use specific scripts | Severe |
-| Simple tasks over-constrained | Should allow flexibility | Warning |
-| Missing freedom guidance | When to follow strictly vs adjust | Info |
-
-### Applies To
-
-- **Prompts**: Match verbosity constraints to task complexity
-- **Skills**: Scripts for fragile ops, guidelines for flexible tasks
-- **Plugins/Hooks**: Specific matchers for critical flows
-- **Commands**: Structured output for data extraction, flexible for creative tasks
+- **提示词**：不过度解释常见概念
+- **记忆文件**：简洁、可操作的指令
+- **技能**：正文 ≤500 行，使用参考文件放置详情
+- **插件**：组件描述简短，详情在正文中
+- **命令/代理**：描述包含触发条件，不包含实现
 
 ---
 
-## AI Capability Model
+## 自由度匹配
 
-### Default Assumption
+### 核心概念
 
-AI executors have strong contextual understanding and can infer meaning from context and common sense.
+将约束的具体程度与任务的脆弱性和可变性匹配。
 
-### AI Trust Levels
+### 自由度级别
 
-| Trust Level | When to Apply | Rule Density |
-|-------------|---------------|--------------|
-| **High trust** | Standard coding tasks | Minimal rules |
-| **Medium trust** | Domain-specific tasks | Moderate rules |
-| **Low trust** | Safety-critical tasks | More explicit rules |
+| 级别 | 何时应用 | 实现 | 示例 |
+|------|----------|------|------|
+| **高** | 多种有效方法，依赖上下文 | 文本指令 | 代码风格建议 |
+| **中** | 存在首选模式，允许一些变化 | 伪代码、参数化 | API 调用模板 |
+| **低** | 脆弱操作，一致性关键 | 具体脚本、少量参数 | PDF 表单填充 |
 
-**Default**: High trust. Only reduce trust with justification.
+### 类比
 
-### Balance Principle
+AI 探索一条路径：
+- **狭窄悬崖桥** → 需要具体护栏（低自由度）
+- **开阔田野** → 多条路线都可接受（高自由度）
 
-1. **Identify issues first**: Assume issue exists, then verify if AI capability exempts it
-2. **Burden of proof**: To exempt, must prove "AI can infer correct understanding"
-3. **Necessity threshold**: If removing constraint causes ≥30% to misunderstand → Necessary
+### 审计检查
 
----
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 高自由度的脆弱操作 | 应使用具体脚本 | Severe |
+| 过度约束的简单任务 | 应允许灵活性 | Warning |
+| 缺少自由度指导 | 何时严格遵循 vs 调整 | Info |
 
-## Fix Priority Hierarchy
+### 适用于
 
-### Priority 1: DELETE (Highest)
-
-**Question**: Can this issue be fixed by REMOVING something?
-
-| Scenario | Fix |
-|----------|-----|
-| Redundant rule exists | Delete the redundant copy |
-| Unnecessary constraint | Remove the constraint |
-| Over-explanation | Delete the explanation |
-| Outdated content | Remove entirely |
-| Duplicate information | Keep one, delete others |
-
-### Priority 2: MERGE
-
-**Question**: Can this issue be fixed by COMBINING elements?
-
-| Scenario | Fix |
-|----------|-----|
-| Scattered related rules | Merge into one section |
-| Multiple similar files | Combine into one file |
-| Fragmented documentation | Consolidate |
-| Overlapping responsibilities | Merge components |
-
-### Priority 3: RESTRUCTURE
-
-**Question**: Can this issue be fixed by REORGANIZING?
-
-| Scenario | Fix |
-|----------|-----|
-| Confusing organization | Restructure hierarchy |
-| Wrong level of abstraction | Move content to correct level |
-| Poor separation of concerns | Reorganize by responsibility |
-| Inverted disclosure order | Reorder sections |
-
-### Priority 4: MODIFY
-
-**Question**: Can this issue be fixed by CHANGING existing content?
-
-| Scenario | Fix |
-|----------|-----|
-| Unclear wording | Rewrite for clarity |
-| Incorrect information | Correct the error |
-| Inconsistent naming | Rename to be consistent |
-| Wrong constraint level | Adjust (MUST→SHOULD) |
-
-### Priority 5: ADD (Last Resort)
-
-**Before adding ANYTHING, verify ALL:**
-- [ ] AI cannot infer from context?
-- [ ] Cannot fix by removing conflicting content?
-- [ ] Cannot fix by restructuring?
-- [ ] Causes ≥30% failure rate without it?
-- [ ] Not already implied by existing content?
-
-**If ALL checked → Addition may be justified**
-
-### When ADD is Necessary (Exceptions)
-
-Despite the "ADD as last resort" principle, the following are considered **necessary additions**:
-
-| Category | Examples | Why Necessary |
-|----------|----------|---------------|
-| Official standards | API parameters, protocol specs, format definitions from official docs | Cannot be inferred, must be exact |
-| Safety-critical rules | Security constraints, data validation, access control | Risk of harm if omitted |
-| Necessary prohibition rules | "Do NOT" lists for scope control, feature creep prevention | Prevents unintended behavior |
-| Necessary clarifying examples | When rule is ambiguous without example | Reduces misinterpretation |
-
-**Key principle**: "Necessary" means removal would cause ≥30% misunderstanding or functional failure.
-
-**Applies equally to auditing**: When auditing other skills, do NOT flag necessary additions as violations of Occam's Razor.
+- **提示词**：将详尽约束与任务复杂度匹配
+- **技能**：脆弱操作用脚本，灵活任务用指南
+- **插件/钩子**：关键流程用具体匹配器
+- **命令**：数据提取用结构化输出，创意任务用灵活方式
 
 ---
 
-## Necessity Threshold
+## AI 能力模型
 
-### Quantified Thresholds
+### 默认假设
 
-| Scenario | Necessary? | Reasoning |
-|----------|------------|-----------|
-| AI fails >30% without constraint | Yes | Clear necessity |
-| AI fails 10-30% without constraint | Maybe | Weigh cost/benefit |
-| AI fails <10% without constraint | No | AI can handle it |
-| Content AI can infer from context | No | Trust AI capability |
-| Edge case <5% occurrence | No | Handle as exception |
+AI 执行者具有强大的上下文理解能力，能从上下文和常识推断含义。
 
-### Size Thresholds
+### AI 信任级别
 
-**SKILL.md body** (official requirement):
+| 信任级别 | 何时应用 | 规则密度 |
+|----------|----------|----------|
+| **高信任** | 标准编程任务 | 最少规则 |
+| **中信任** | 领域特定任务 | 适度规则 |
+| **低信任** | 安全关键任务 | 更多显式规则 |
 
-| Range | Status | Action |
-|-------|--------|--------|
-| ≤500 lines | Ideal | No action |
-| 500-550 (≤10% over) | Acceptable | **NOT an issue** |
-| 550-625 (10-25% over) | Review | Info only |
-| >625 lines | Optimize | Warning |
+**默认**：高信任。只有在有理由时才降低信任。
 
-**Reference files**: No official limit. Evaluate based on content nature (see `rules-universal.md`).
+### 平衡原则
 
-### Anti-Patterns to Avoid
+<ai_capability_reasoning>
+"AI 能否推断这个"的推理过程：
+- 首先识别问题，假设它存在
+- 然后验证 AI 能力是否使其豁免
+- 举证责任：必须证明"AI 能推断出正确理解"
+- 应用必要性阈值：如果移除约束导致 ≥30% 误解 → 必要
+</ai_capability_reasoning>
 
-| Anti-Pattern | Why Wrong | Better |
-|--------------|-----------|--------|
-| "Add a Note" | Hides real issue | Move important info where visible |
-| "Add an Example" | Compensates for bad writing | Rewrite rule clearly |
-| "Add a Constraint" | Symptoms over cause | Fix root cause |
-| "Add Documentation" | May be unnecessary | Question if behavior needed |
-| "Add Cross-Reference" | Creates coupling | MERGE related content |
-
-### Fix Proposal Anti-Patterns
-
-**CRITICAL**: These patterns indicate the fix proposal itself violates core principles:
-
-| Anti-Pattern | Example | Why Wrong | Correct Approach |
-|--------------|---------|-----------|------------------|
-| Adding hardcoded numbers | "Add: ≤5 bullets, ≤200 words" | AI can judge from examples | Check if examples already convey length expectation |
-| Adding prohibition rules | "Add: Do NOT fabricate" | AI understands from context (e.g., "based on materials") | Verify if context already implies this |
-| Adding explicit rules for implied behavior | "Add: Data must come from user materials" | Original design shows `{{from materials}}` placeholders | Recognize that design pattern already conveys intent |
-| Over-specifying format | "Add: Use table format for X" | Examples already show table format | AI can infer from existing examples |
-| Defensive additions | "Add rule to prevent edge case" | Edge case <5% occurrence | Trust AI to handle reasonably |
-
-**Self-Check Before Outputting Fix**:
-1. "If I remove this fix, would AI still produce correct output?" → If YES, fix is unnecessary
-2. "Is this fix adding hardcoded content?" → If YES, reconsider
-3. "Does the original design already convey this through examples/patterns?" → If YES, don't add
+1. **先识别问题**：假设问题存在，然后验证 AI 能力是否使其豁免
+2. **举证责任**：要豁免，必须证明"AI 能推断出正确理解"
+3. **必要性阈值**：如果移除约束导致 ≥30% 误解 → 必要
 
 ---
 
-## Summary
+## 修复优先级层次
 
-| Principle | Key Point |
-|-----------|-----------|
-| **5-Point Check** | All issues must pass 5 verification steps |
-| **Occam's Razor** | "If necessary" is the key, not "fewer is better" |
-| **AI Trust** | AI can infer most things from context and examples |
-| **Fix Hierarchy** | DELETE > MERGE > RESTRUCTURE > MODIFY > ADD |
-| **Addition Test** | All 5 criteria must pass before adding |
-| **Size Tolerance** | ≤10% over is NOT an issue |
-| **Fix Validation** | ALL fix proposals must pass principle check before output |
-| **No Hardcoding** | Do NOT add hardcoded values where AI should judge from context |
+### 优先级 1：DELETE（删除）（最高）
+
+**问题**：这个问题能否通过删除某些内容来修复？
+
+| 场景 | 修复 |
+|------|------|
+| 存在冗余规则 | 删除冗余副本 |
+| 不必要的约束 | 移除约束 |
+| 过度解释 | 删除解释 |
+| 过时内容 | 完全移除 |
+| 重复信息 | 保留一个，删除其他 |
+
+### 优先级 2：MERGE（合并）
+
+**问题**：这个问题能否通过合并元素来修复？
+
+| 场景 | 修复 |
+|------|------|
+| 分散的相关规则 | 合并到一个章节 |
+| 多个相似文件 | 合并为一个文件 |
+| 碎片化文档 | 整合 |
+| 重叠职责 | 合并组件 |
+
+### 优先级 3：RESTRUCTURE（重构）
+
+**问题**：这个问题能否通过重新组织来修复？
+
+| 场景 | 修复 |
+|------|------|
+| 混乱的组织 | 重构层次结构 |
+| 错误的抽象级别 | 移动内容到正确级别 |
+| 关注点分离不当 | 按职责重新组织 |
+| 颠倒的披露顺序 | 重新排序章节 |
+
+### 优先级 4：MODIFY（修改）
+
+**问题**：这个问题能否通过修改现有内容来修复？
+
+| 场景 | 修复 |
+|------|------|
+| 措辞不清 | 重写以提高清晰度 |
+| 信息不正确 | 纠正错误 |
+| 命名不一致 | 重命名以保持一致 |
+| 约束级别错误 | 调整（MUST→SHOULD） |
+
+### 优先级 5：ADD（添加）（最后手段）
+
+**在添加任何内容之前，验证全部：**
+- [ ] AI 无法从上下文推断？
+- [ ] 无法通过移除冲突内容修复？
+- [ ] 无法通过重构修复？
+- [ ] 没有它会导致 ≥30% 失败率？
+- [ ] 尚未被现有内容暗示？
+
+**如果全部勾选 → 添加可能是合理的**
+
+### ADD 必要的情况（例外）
+
+尽管"ADD 作为最后手段"原则，以下被认为是**必要的添加**：
+
+| 类别 | 示例 | 为何必要 |
+|------|------|----------|
+| 官方标准 | API 参数、协议规范、官方文档的格式定义 | 无法推断，必须精确 |
+| 安全关键规则 | 安全约束、数据验证、访问控制 | 如果遗漏有害风险 |
+| 必要的禁止规则 | 用于范围控制、防止功能蔓延的"禁止"列表 | 防止意外行为 |
+| 必要的澄清示例 | 当规则没有示例会模糊时 | 减少误解 |
+
+**关键原则**："必要"意味着移除会导致 ≥30% 误解或功能失败。
+
+**同样适用于审计**：审计其他技能时，不要将必要的添加标记为违反奥卡姆剃刀。
+
+### 何时添加推理标签
+
+**推理标签是必要添加的特殊情况** - 它们帮助 AI 在关键决策点进行深度思考。
+
+<reasoning_tag_addition_criteria>
+添加推理标签的标准：
+- 这是需要多重考量的复杂判断吗？
+- 决策是否涉及比较替代方案？
+- 没有显式推理是否有浅层/错误判断的风险？
+- 标记这个点是否会提高 AI 执行质量？
+</reasoning_tag_addition_criteria>
+
+**核心规则**：
+- **命名**：使用 `<{领域}_{动作}>` 格式（如 `<design_intent_analysis>`、`<necessity_reasoning>`）
+- **内容**：只包含推理过程（判断标准、考量因素），不包含执行步骤
+- **放置**：在决策逻辑之前，不是之后
+
+> **完整规范**：见 `rules-universal.md` → 推理标签章节，了解详细审计检查和示例。
+
+---
+
+## 必要性阈值
+
+### 量化阈值
+
+| 场景 | 必要？ | 理由 |
+|------|--------|------|
+| 没有约束 AI 失败 >30% | 是 | 明确的必要性 |
+| 没有约束 AI 失败 10-30% | 可能 | 权衡成本/收益 |
+| 没有约束 AI 失败 <10% | 否 | AI 能处理 |
+| AI 能从上下文推断的内容 | 否 | 信任 AI 能力 |
+| 发生率 <5% 的边缘情况 | 否 | 作为例外处理 |
+
+### 尺寸阈值
+
+**SKILL.md 正文**（官方要求）：
+
+| 范围 | 状态 | 操作 |
+|------|------|------|
+| ≤500 行 | 理想 | 无需操作 |
+| 500-550（≤10% 超出）| 可接受 | **不是问题** |
+| 550-625（10-25% 超出）| 审查 | 仅 Info |
+| >625 行 | 优化 | Warning |
+
+**参考文件**：无官方限制。根据内容性质评估（见 `rules-universal.md`）。
+
+### 应避免的反模式
+
+| 反模式 | 为何错误 | 更好的做法 |
+|--------|----------|-----------|
+| "添加注释" | 隐藏真正问题 | 将重要信息移到可见处 |
+| "添加示例" | 补偿糟糕的写作 | 清晰地重写规则 |
+| "添加约束" | 治标不治本 | 修复根本原因 |
+| "添加文档" | 可能不必要 | 质疑是否需要该行为 |
+| "添加交叉引用" | 创建耦合 | 合并相关内容 |
+
+### 修复建议反模式
+
+**关键**：这些模式表明修复建议本身违反了核心原则：
+
+<fix_proposal_comparison>
+输出修复建议之前，比较和推理：
+- 原始设计是否已通过示例/结构传达意图？
+- AI 能否从现有上下文推断正确行为？
+- 添加硬编码值 vs 让 AI 从上下文判断 - 哪个合适？
+- 添加禁止规则 vs 依赖 AI 理解意图 - 哪个必要？
+</fix_proposal_comparison>
+
+| 反模式 | 示例 | 为何错误 | 正确方法 |
+|--------|------|----------|----------|
+| 添加硬编码数字 | "添加：≤5 个要点，≤200 字" | AI 能从示例判断 | 检查示例是否已传达长度期望 |
+| 添加禁止规则 | "添加：禁止捏造" | AI 从上下文理解（如"基于材料"）| 验证上下文是否已暗示这一点 |
+| 为隐含行为添加显式规则 | "添加：数据必须来自用户材料" | 原始设计展示 `{{from materials}}` 占位符 | 认识到设计模式已传达意图 |
+| 过度指定格式 | "添加：对 X 使用表格格式" | 示例已展示表格格式 | AI 能从现有示例推断 |
+| 防御性添加 | "添加规则防止边缘情况" | 边缘情况发生率 <5% | 信任 AI 能合理处理 |
+
+**输出修复前的自检**：
+1. "如果移除这个修复，AI 还会产生正确输出吗？" → 如果是，修复不必要
+2. "这个修复是否在添加硬编码内容？" → 如果是，重新考虑
+3. "原始设计是否已通过示例/模式传达这一点？" → 如果是，不要添加
+
+---
+
+## 总结
+
+| 原则 | 关键点 |
+|------|--------|
+| **五点检查** | 所有问题必须通过 5 步验证 |
+| **奥卡姆剃刀** | "如必要"是关键，不是"越少越好" |
+| **AI 信任** | AI 能从上下文和示例推断大多数内容 |
+| **修复层次** | DELETE > MERGE > RESTRUCTURE > MODIFY > ADD |
+| **添加测试** | 添加前必须通过全部 5 项标准 |
+| **尺寸容忍** | ≤10% 超出不是问题 |
+| **修复验证** | 所有修复建议在输出前必须通过原则检查 |
+| **禁止硬编码** | 不要在 AI 应从上下文判断的地方添加硬编码值 |

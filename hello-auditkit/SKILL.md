@@ -1,7 +1,21 @@
 ---
 name: hello-auditkit
-description: Use this skill to audit, review, validate, or check the quality of AI assistant configurations including prompt text, prompt files, skills (SKILL.md), plugins, MCP servers, agents, hooks, memory files (AGENTS.md, CLAUDE.md, GEMINI.md), and composite configurations. Evaluates against GPT Prompting Guide best practices.
-version: 1.1.0
+description: |
+  使用本技能审计、审查、验证或检查 AI 助手配置的质量。
+  触发条件："审计"、"审查"、"验证"、"检查质量"、"分析提示词"、"评估技能"、
+  "检查插件"、"验证配置"、"评估记忆文件"、"GPT 提示词指南合规性"、
+  "audit"、"review"、"validate"、"check quality"。
+  支持：提示词文本、提示词文件、技能 (SKILL.md)、插件、MCP 服务器、代理、钩子、
+  记忆文件 (AGENTS.md, CLAUDE.md, GEMINI.md) 以及复合配置。
+license: MIT
+compatibility: |
+  需要网络访问以获取 openai-cookbook 中的最新 GPT 提示词指南。
+  适用于 Claude Code、Codex CLI、Gemini CLI 及类似的 AI 编程助手。
+metadata:
+  author: anthropic-community
+  version: "2.0.0"
+  category: audit
+  tags: ["audit", "quality", "prompting", "best-practices", "gpt-guide"]
 ---
 
 <!-- ============ OUTPUT LANGUAGE CONFIGURATION ============ -->
@@ -11,506 +25,493 @@ version: 1.1.0
 
 <!-- ======================================================= -->
 
-> **IMPORTANT**: All audit output MUST be in the language specified above.
-
-<!-- ============ CRITICAL CONSTRAINTS (GPT-5.2 COMPLIANT) ============ -->
-
 <output_verbosity_spec>
-- Default audit report: Follow ref-output-format.md structure exactly
-- Progress updates: 1-2 sentences only, at major phase transitions
-- Issue descriptions: Concise, with line numbers and evidence
-- Do NOT add lengthy explanations where tables suffice
-- Do NOT rephrase user's request unless it changes semantics
+**输出模式**：仅文件（报告保存至文件，不在终端显示）
+
+**终端输出**（仅简要进度）：
+- 阶段转换："正在执行 [阶段名称]..."（1-2 句话）
+- 审计期间的问题描述：简洁，包含行号和证据
+- 禁止在终端显示完整审计报告
+- 禁止在简洁更新足够时添加冗长解释
 </output_verbosity_spec>
 
 <design_and_scope_constraints>
-- Audit EXACTLY and ONLY what user provides (file, directory, or pasted text)
-- Do NOT add unrequested checks or recommendations
-- Do NOT apply fixes without explicit user confirmation
-- If audit target ambiguous, ask for clarification rather than guessing
-- Respect the 5-Point Verification: discard issues that fail any check
+- 仅审计用户提供的内容（文件、目录或粘贴的文本）
+- 禁止添加未请求的检查或建议
+- 禁止在用户明确确认前应用修复
+- 如审计目标不明确，应询问澄清而非猜测
+- 遵循五点验证法：丢弃未通过任何检查的问题
 </design_and_scope_constraints>
 
 <user_updates_spec>
-- Send brief updates (1-2 sentences) only when:
-  - Starting a new major phase (Detection, Universal Checks, Type-Specific, Report)
-  - Discovering something that changes the audit approach
-- Avoid narrating routine file reads or check executions
-- Each update must include concrete outcome ("Found X issues", "Loaded Y rules")
-- Do NOT expand the audit beyond what user requested
+- 仅在以下情况发送简要更新（1-2 句话）：
+  - 开始新的主要阶段（检测、通用检查、类型特定、报告）
+  - 发现改变审计方式的内容
+- 避免叙述常规文件读取或检查执行
+- 每次更新必须包含具体结果（"发现 X 个问题"、"加载了 Y 条规则"）
+- 禁止扩展超出用户请求的审计范围
 </user_updates_spec>
 
 <uncertainty_and_ambiguity>
-- If audit target unclear: ask 1-3 clarifying questions
-- If rule interpretation ambiguous: choose simplest valid interpretation
-- Never fabricate line numbers, file names, or issue details
-- Use hedging language for uncertain assessments: "appears to", "may indicate"
-- Base all findings on actual content examined
+- 如审计目标不明确：提出 1-3 个澄清问题
+- 如规则解释有歧义：选择最简单的有效解释
+- 禁止捏造行号、文件名或问题详情
+- 对不确定的评估使用谨慎措辞："似乎"、"可能表明"
+- 所有发现基于实际检查的内容
 </uncertainty_and_ambiguity>
 
+<citation_verification_spec>
+**引用验证规范（强制）**
+
+**核心原则**：审计报告中的每一个问题引用必须可验证。禁止"凭印象"生成内容。
+
+**必须执行的验证步骤**：
+1. **生成问题前**：使用 Read 工具读取相关文件，记录精确行号和内容
+2. **写入"当前"内容时**：必须从最近一次 Read 结果中**直接复制**，禁止凭记忆书写
+3. **报告生成后**：对每个 🔴/🟡 问题执行回查验证（见 workflow-execution.md 步骤 7B）
+
+**验证失败处理**：
+- 如果回查发现引用内容与实际不符 → 删除该问题或修正引用
+- 如果无法确定精确行号 → 使用"约第 N 行附近"并标注需人工确认
+- 如果内容确实不存在 → 该问题为无效问题，必须删除
+
+**禁止行为**：
+- 禁止在未读取文件的情况下声称某行有某内容
+- 禁止根据"应该有"来生成问题（只能根据"确实有"）
+- 禁止使用模糊的行号范围（如"第 500-600 行"）作为问题位置
+</citation_verification_spec>
+
 <tool_usage_rules>
-- When scanning multiple files or checking multiple dimensions, parallelize independent read operations
-- Prefer tools over internal knowledge for fresh data
-- After writes, restate: what changed, where, validation performed
+- 扫描多个文件或检查多个维度时，并行化独立的读取操作
+- 获取新鲜数据时优先使用工具而非内部知识
+- 写入后重述：改变了什么、在哪里、执行了什么验证
 </tool_usage_rules>
 
 <long_context_handling>
-- For audits involving multiple reference files, produce internal outline of key sections first
-- Re-state user constraints before generating report
-- Anchor findings to specific file:line references
+- 涉及多个参考文件的审计，先生成关键章节的内部大纲
+- 生成报告前重述用户约束
+- 将发现锚定到具体的文件:行号引用
 </long_context_handling>
 
 <report_output_spec>
-Section 2 Cross-Cutting - GPT Guide Compliance MUST appear FIRST.
+**报告文件内容**（通过 scripts/save_report.py 保存）：
+- 严格遵循 ref-output-format.md 的结构
+- 第 2 节 交叉检查 - GPT 指南合规性必须放在最前面
+- 第 3.1 节 已确认问题 - 按严重性分组的 markdown 表格（🔴 → 🟡 → 🟢）
+- 第 3.2 节 已过滤问题 - 带过滤原因的 markdown 表格
+- 第 4 节 修复建议 - 每个已确认问题都需要：位置、问题、影响、当前、建议
+- 第 5 节 结论 - 包含"建议操作"和操作选项
 
-Section 3.1 Confirmed Issues - MUST use markdown table:
-| # | File | Line | Issue Summary | Dimension | Fix Type |
-Group by severity: 🔴 → 🟡 → 🟢, each as separate table.
-
-Section 3.2 Filtered Issues - MUST use markdown table:
-| # | File | Line | Issue Description | Filter Reason |
-
-Section 4 Fix Proposals - MUST include for EVERY confirmed issue:
-Location, Problem, Impact, Current (code block), Proposal (code block).
-
-Section 5 Conclusion - PHASE GATE:
-After outputting, STOP and wait for user input. Do NOT apply fixes until user confirms.
+**保存后的终端输出**：
+1. 摘要行：`审计完成: 🔴{n} 🟡{n} 🟢{n} | 判定: {通过/需改进/不通过}`
+2. 保存通知：`审计报告已保存至: {完整路径}`
+3. 操作提示：
+```
+请查看报告后输入要修复的问题编号:
+- 输入 1 或 1,2 或 1-3 选择修复项
+- 输入 all 应用所有修复
+- 输入其他内容继续对话
+```
 </report_output_spec>
+
+<report_save_spec>
+**保存脚本**：`scripts/save_report.py`
+
+**用法**（跨平台）：
+```bash
+# Windows:
+python -X utf8 scripts/save_report.py --project "{项目名}" --output-dir "{输出目录}" --content "{报告内容}"
+
+# macOS/Linux:
+python3 scripts/save_report.py --project "{项目名}" --output-dir "{输出目录}" --content "{报告内容}"
+
+# 通过 stdin（所有平台）:
+echo "{报告内容}" | python3 scripts/save_report.py --project "{项目名}" --output-dir "{输出目录}"
+```
+
+**参数**：
+- `--project, -p`：项目名（目录名、不带扩展名的文件名，或 `inline_text`）
+- `--output-dir, -o`：被审计项目的父目录（报告保存在旁边，不在内部）
+- `--content, -c`：完整报告内容（或通过 stdin 传入）
+
+**跨平台注意事项**：
+- Windows：使用 `python -X utf8` 以支持中文字符
+- macOS/Linux：使用 `python3`，UTF-8 为默认
+- 所有平台：所有路径用 `"` 引号包裹以兼容中文/空格
+
+**文件名格式**：`审计报告_{项目名}_{YYYYMMDD_HHmmss}.md`
+
+**项目名规则**：
+| 审计目标 | 项目名 | 输出目录 |
+|----------|--------|----------|
+| 目录 `/path/to/my-skill` | `my-skill` | `/path/to` |
+| 文件 `/path/to/config.md` | `config` | `/path/to` |
+| 粘贴文本 | `inline_text` | 当前工作目录 |
+
+**执行流程**：
+1. 在内存中生成完整审计报告内容（第 0-5 节）
+2. 运行 save_report.py 脚本传入报告内容
+3. 从脚本 stdout 捕获输出路径
+4. 显示终端摘要和保存通知
+5. **备用策略**（脚本失败或无输出时）：
+   - 使用 CLI 内置文件写入能力保存报告
+   - 相同文件名格式：`审计报告_{项目名}_{时间戳}.md`
+   - 相同输出目录规则
+   - 如所有写入方法都失败，在终端显示完整报告作为最后手段
+</report_save_spec>
 
 <!-- ============================================================== -->
 
-# Hello-AuditKit: AI Coding Assistant Audit System
+# Hello-AuditKit: AI 编程助手审计系统
 
-## Table of Contents
+## 目录
 
-- [Entry Point](#entry-point)
-- [Overview](#overview)
-- [Core Principles](#core-principles)
-- [Audit Execution](#audit-execution)
-- [Reference Files](#reference-files)
-- [Special Reminders](#special-reminders)
-- [External Documentation](#external-documentation)
+- [入口点](#入口点)
+- [概述](#概述)
+- [核心原则](#核心原则)
+- [审计执行](#审计执行)
+- [参考文件](#参考文件)
+- [外部文档](#外部文档)
+- [审计标准摘要](#审计标准摘要)
 
-## Entry Point
+## 入口点
 
-**On skill invocation, first determine the audit target:**
+**技能调用时，按阶段执行：**
 
-| User Input | Action |
-|------------|--------|
-| No target specified | Show welcome message and usage guide (see below) |
-| File path provided | Audit the specified file |
-| Directory path provided | Scan and audit the directory |
-| Text content pasted | Audit as prompt text |
+<audit_phases>
+### 审计阶段概览
 
-**Welcome Message** (when no target):
+| 阶段 | 名称 | 触发条件 | 核心操作 | 输出 |
+|------|------|----------|----------|------|
+| 1 | 资料收集 | SKILL 激活且无资料 | 显示欢迎消息 | 等待用户提供资料 |
+| 2 | 快速验证 | 用户提供了资料 | 轻量检查资料有效性 | 有效→阶段3 / 无效→阶段1 |
+| 3 | 审计确认 | 资料验证通过 | 确认资料并询问 | 确认→阶段4 / 否则等待 |
+| 4 | 全面审计 | 用户确认审计 | 全面扫描+深度分析 | 审计结果 |
+| 5 | 报告修复 | 审计完成 | 生成报告等待修复 | 应用用户选择的修复 |
+
+**阶段转换规则**：
+- 阶段 1 → 阶段 2：用户提供了资料
+- 阶段 2 → 阶段 1：资料无效或不完整
+- 阶段 2 → 阶段 3：资料验证通过
+- 阶段 3 → 阶段 4：用户确认审计
+- 阶段 4 → 阶段 5：审计执行完成
+</audit_phases>
+
+### 阶段 1：资料收集
+
+| 用户输入 | 操作 |
+|----------|------|
+| 未指定目标 | 显示欢迎消息和使用指南 → **停止等待**（不扫描任何文件） |
+| 提供文件/目录/文本 | 进入阶段 2 快速验证 |
+
+**欢迎消息**（无目标时，使用 {OUTPUT_LANGUAGE} 生成）：
 ```
-👋 Hello-AuditKit - AI 配置审计工具
-
-支持审计：
-• 提示词文本（直接粘贴或任意文件）
-• Memory 文件（AGENTS.md, CLAUDE.md, GEMINI.md）
-• Skills（含 SKILL.md 的目录）
-• Plugins（含 .claude-plugin/ 的目录）
-
-使用方式：
-1. 粘贴要审计的提示词文本
-2. 提供文件路径：/path/to/file.md
-3. 提供目录路径：/path/to/skill/
-
-请提供要审计的内容或路径：
-```
-
-**CRITICAL**: After showing welcome, STOP and wait for user input. Do NOT proceed with audit until target is provided.
-
-## Overview
-
-Comprehensive audit system for AI coding assistant configurations:
-
-| Content Type | Identification | Rule File |
-|--------------|----------------|-----------|
-| **Any Text/File** | Pasted text or any file (any filename) | `type-prompt.md` |
-| **AGENTS.md** | Codex agent instructions | `type-memory.md` |
-| **CLAUDE.md** | Claude Code memory files | `type-memory.md` |
-| **GEMINI.md** | Gemini CLI context files | `type-memory.md` |
-| **Skills** | Directory with `SKILL.md` | `type-skill.md` |
-| **Plugins** | Directory with `.claude-plugin/` | `type-plugin.md` |
-| **Composite** | Memory file + skills/ | `cross-composite.md` |
-
-## Core Principles
-
-> **Source**: Based on Latest GPT Prompting Guide (openai-cookbook/examples/gpt-5)
-
-### Principle 0: GPT Prompting Guide Compliance (MANDATORY)
-
-> **CRITICAL**: This is the PRIMARY audit standard. Every audit MUST check these items and report findings.
-
-**For ALL content containing AI instructions, verify:**
-
-| Check | What to Look For | Severity |
-|-------|------------------|----------|
-| Verbosity constraints | Explicit length limits present | Severe |
-| Scope discipline | Explicit boundaries or prohibition list present | Severe |
-| Stop conditions | Strong stop language at phase gates (multi-phase only) | Severe |
-| Constraint centralization | Critical rules concentrated, not scattered >3 locations | Severe |
-| Prohibition language | Strong language for critical constraints | Warning |
-| No fabrication | Grounding instruction for factual tasks | Severe |
-| **XML structure enforcement** | XML tags wrap critical constraints (GPT-5.2+) | Severe |
-
-**XML Tags Compliance (GPT-5.2 MANDATORY)**:
-
-> **CRITICAL**: For agentic/multi-phase prompts, XML tags are REQUIRED to prevent format drift. This is a **strict audit rule**.
-
-| Prompt Type | Required XML Tags | Severity if Missing |
-|-------------|-------------------|---------------------|
-| All with verbosity rules | `<output_verbosity_spec>` | Severe |
-| All with scope rules | `<design_and_scope_constraints>` | Severe |
-| Agentic/multi-phase | `<user_updates_spec>` | Severe |
-| Data extraction | `<extraction_spec>` | Severe |
-| Factual/grounding | `<uncertainty_and_ambiguity>` | Severe |
-| Tool-using | `<tool_usage_rules>` | Warning |
-| Long-context (>10k) | `<long_context_handling>` | Warning |
-| High-risk content | `<high_risk_self_check>` | Warning |
-
-**Audit output**: Report GPT Guide Compliance status with evidence for each check, including XML tags compliance.
-
-### Principle 1: GPT-5.2 Specific Checks (For GPT-5.2+ Prompts)
-
-> **Source**: GPT-5.2 Prompting Guide - Key Behavioral Differences
-
-| Check | What to Look For | Severity |
-|-------|------------------|----------|
-| No task expansion | "Do NOT expand beyond user request" present | Severe |
-| No rephrasing | "Do NOT rephrase user's request" present | Warning |
-| Design system exploration | "Explore existing design systems" instruction | Warning |
-| Style alignment | "Style aligned to design system" instruction | Warning |
-| Explicit preferences | Style preferences articulated (not assumed) | Warning |
-
-### Principle 2: 5-Point Verification
-
-Before marking ANY issue, verify:
-1. **Concrete Scenario** - Can describe specific failure?
-2. **Design Scope** - Within intended boundaries?
-3. **Functional Capability** - Can it actually do what it claims? (Requires domain knowledge first)
-4. **Flaw vs Choice** - Unintentional error or valid choice?
-5. **Threshold Met** - Above quantified threshold?
-
-If ANY fails → Discard the issue
-
-### Principle 3: Occam's Razor
-
-**"If unnecessary, don't add."**
-
-Fix Priority: DELETE > MERGE > RESTRUCTURE > MODIFY > ADD
-
-### Principle 4: AI Capability
-
-- AI CAN infer: synonyms, context, standard terms
-- AI CANNOT: 3+ step inference, domain-specific variations
-- If <30% would misunderstand → exempt from issue
-
-### Principle 5: Size Tolerance (SKILL.md body only)
-
-| Range | Status |
-|-------|--------|
-| ≤500 lines | Ideal |
-| 500-550 (≤10% over) | **NOT an issue** |
-| 550-625 (10-25% over) | Info only |
-| >625 lines | Warning |
-
-> **Note**: Reference files have no official line limit. Evaluate based on content nature.
-
-### Principle 6: Prompt Compliance
-
-**For prompts/instructions, verify critical checks** (see `type-prompt.md` → Prompt Compliance Checks):
-- Verbosity constraints (Severe)
-- Scope boundaries with "do not" list (Severe)
-- No fabrication instruction (Severe)
-- Output schema for structured tasks (Warning)
-
-### Principle 7: Grounding & No Fabrication
-
-- Base all findings on actual content examined
-- Never fabricate line numbers, file names, or issue details
-- Use hedging language for uncertain assessments: "appears to", "may indicate"
-
-## Audit Execution
-
-> **CRITICAL**: Each step below is MANDATORY. You must execute (not just read) each check and output evidence of execution.
->
-> **Agentic Updates**: Send brief updates (1-2 sentences) only at major phase transitions. Avoid narrating routine tool calls.
->
-> **Tool Parallelization**: When scanning multiple files or checking multiple dimensions, parallelize independent read operations for efficiency.
-
-### Step 0: Fetch Latest Prompting Guide (MANDATORY STANDARD)
-
-> **CRITICAL**: The GPT Prompting Guide is a **primary audit standard**, not just a reference. All prompts/instructions MUST be evaluated against these rules.
-
-1. Access this directory page to get file list: `https://github.com/openai/openai-cookbook/tree/main/examples/gpt-5`
-2. Select the latest version prompting guide (e.g., `gpt-5-2_prompting_guide.ipynb` > `gpt-5-1_prompting_guide.ipynb` > `gpt-5_prompting_guide.ipynb`)
-3. Extract and apply these **mandatory checks** from the guide:
-   - **Verbosity constraints**: "≤N sentences/bullets/words" present?
-   - **Scope discipline**: "EXACTLY and ONLY what requested" + "Do NOT" list present?
-   - **Stop conditions**: Explicit completion criteria for multi-phase content?
-   - **No fabrication**: "Never fabricate..." instruction for factual tasks?
-   - **Long-context handling**: Outline + constraint restatement for >10k tokens?
-   - **Tool preference**: Tools over internal knowledge for fresh data?
-   - **Agentic updates**: Brief (1-2 sentences) at major phases only?
-   - **XML structure enforcement** (GPT-5.2+): XML tags wrap critical constraints?
-4. **XML Tags Compliance Check** (STRICT RULE):
-   - Identify prompt type: agentic, extraction, factual, tool-using, long-context, high-risk
-   - Check for required XML tags per type (see Principle 0 table)
-   - If XML tags missing for applicable type → Flag as Severe
-   - Required tags: `<output_verbosity_spec>`, `<design_and_scope_constraints>`, `<user_updates_spec>`, `<extraction_spec>`, `<uncertainty_and_ambiguity>`, `<tool_usage_rules>`, `<long_context_handling>`, `<high_risk_self_check>`
-5. Cross-validate with built-in checks in `type-prompt.md`
-6. **Flag as Severe** if audited content violates any mandatory check above
-
-**Evidence Output**: Note guide version fetched, list mandatory checks applied (including XML tags), note any violations found.
-
-**If WebFetch fails**: Retry before falling back to offline mode. If still fails, use built-in checks in `type-prompt.md`, note "offline mode - [error reason]" in report.
-
-### Step 1: Detection & Classification
-
-Scan path → identify type → load appropriate rules:
-
-```
-Any text/file   → type-prompt.md (default for unrecognized types)
-Memory file     → type-memory.md (AGENTS.md, CLAUDE.md, GEMINI.md)
-Skill           → type-skill.md (directory with SKILL.md)
-Plugin          → type-plugin.md (directory with .claude-plugin/)
-Composite       → Apply all + cross-*.md
+包含内容：
+- 包含工具名称的问候语
+- 支持的审计类型：提示词文本、记忆文件、技能、插件
+- 必备资料说明：需要提供文件路径、目录路径或粘贴文本
+- 提示输入
 ```
 
-### Step 2: Execute Universal Checks (ALL TYPES)
+**关键**：阶段 1 仅收集资料，禁止进行任何文件扫描或内容分析。
 
-> **FIRST**: Execute Principle 0 (GPT Guide Compliance) checks before proceeding.
+### 阶段 2：快速验证
 
-**GPT Guide Compliance Check (MANDATORY FIRST):**
+**目的**：轻量验证用户提供的资料是否有效且符合审计要求。
 
-Execute each check from Principle 0 table, record status and evidence (line numbers, quotes).
+| 验证项 | 检查内容 |
+|--------|----------|
+| 路径有效性 | 文件/目录是否存在 |
+| 类型识别 | 是否能识别为支持的审计类型（Prompt/Memory/Skill/Plugin） |
+| 基本完整性 | 对于 Skill/Plugin，必需文件是否存在 |
 
-**Every audit MUST execute these checks from `rules-universal.md`:**
+**快速验证操作**（仅轻量检查，不深入分析）：
+- 检查文件/目录存在性
+- 识别内容类型
+- 对于 Skill：检查 SKILL.md 是否存在
+- 对于 Plugin：检查 .claude-plugin/ 是否存在
 
-| Category | Action Required | Evidence Output |
-|----------|-----------------|-----------------|
-| Naming & Numbering | Extract ALL: (1) naming conventions (kebab-case, no special chars), (2) numbered sequences → verify sequential, no duplicates, no gaps, (3) order validation → section order logical, heading hierarchy H1→H2→H3 | "Checked N sequences, M naming issues, K order issues" |
-| Reference Integrity | Extract ALL references (file refs, anchor links, numbered refs like R1/Step 2) → verify each target exists, no circular refs | "Checked N refs, M broken, K circular" |
-| Structure & Organization | (1) TOC-content match, (2) section categorization correct, (3) template compliance (required sections present, order correct), (4) no orphan sections | "TOC: N entries vs M headings, K mismatches; Template: L issues" |
-| Diagram & Flowchart | If exists: (1) node-text consistency, (2) all paths have endpoints, (3) no infinite loops, (4) decision branches complete | "Checked N diagrams, M consistency issues, K logic issues" |
-| Language Expression | (1) Ambiguity patterns (may/might/could without condition), (2) terminology consistency (same concept = same term), (3) spelling errors in identifiers/headings, (4) redundant content, (5) LLM wording patterns (hedging language, avoid absolutes, scope constraint wording, verbosity constraint wording) | "Found N ambiguity, M terminology, K spelling, L redundancy, P wording issues" |
-| Security & Compliance | Check for hardcoded secrets, paths, credentials; input validation rules | "Checked, N security issues" |
-| Size Thresholds | SKILL.md body: apply tiered thresholds (≤500 ideal). Reference files: evaluate by content nature | "SKILL.md: N lines (status)" |
-| Rule Logic | If rules exist: (1) no conflicts, (2) no duplicates/semantic equivalents, (3) coverage complete, (4) optimization opportunities (DELETE > MERGE > MODIFY) | "Checked N rules: M conflicts, K duplicates, L gaps" |
-| Process Logic | If process/flow defined: (1) all scenarios covered, (2) main flow clear, (3) no dead loops, (4) no conflicting invocations | "Process: N scenarios, M flow issues" |
-| Output & i18n | If output format defined: (1) format specification complete, (2) language control correct (if i18n configured), (3) no hardcoded language-specific content | "Output: N format issues, M i18n issues" |
-| Prompt Compliance | (1) Verbosity constraints present, (2) Scope boundaries with "do not" list, (3) No fabrication instruction, (4) Output schema for structured tasks, (5) Grounding for uncertain claims, (6) Tool preference over internal knowledge, (7) Agentic updates brief with concrete outcomes, (8) Long-context outline for >10k tokens, (9) **XML tags for critical constraints** (GPT-5.2+) | "Prompt: N verbosity, M scope, K grounding, L tool, P agentic, Q XML issues" |
-| Conversational/Multi-Phase | If content has phases: (1) constraints at TOP, (2) explicit stop conditions, (3) scope drift prevention, (4) phase gates, (5) **constraint centralization** (rules in ≤3 locations), (6) **stop condition strength** (strong vs weak), (7) **prohibition language strength** ("禁止/Do NOT" vs "不要/don't") | "Conversational: N issues (centralization: X, stop strength: Y, prohibition: Z)" |
+| 验证结果 | 操作 |
+|----------|------|
+| 资料无效或不完整 | 说明问题 → 继续索要 → 返回阶段 1 |
+| 资料有效且完整 | 进入阶段 3 |
 
-**Numbering Check Execution** (commonly missed):
-1. Find all numbered lists (1. 2. 3. or Step 0, Step 1, etc.)
-2. Verify: sequential? no duplicates? no gaps?
-3. Find all TOC entries → verify each has matching heading
-4. Cross-section: if steps span sections (Step 0 here, Step 3 there), verify continuity
+### 阶段 3：审计确认
 
-### Step 3: Execute Type-Specific Checks
+**确认消息**（使用 {OUTPUT_LANGUAGE} 生成）：
+```
+包含内容：
+- 确认已收到资料
+- 显示识别的审计类型和目标路径
+- 询问：是否开始审计？
+```
 
-**Based on content type, execute ALL checks in the relevant file:**
+| 用户响应 | 操作 |
+|----------|------|
+| 确认审计（是/开始/确认/audit/yes/start） | 进入阶段 4 |
+| 不确认或其他 | 停止等待或询问用户意图 |
 
-#### For Prompts (`type-prompt.md`):
-| Check Category | Action |
-|----------------|--------|
-| Structure Validation | Verbosity constraints? Scope boundaries? Output format? |
-| Content Quality | Specific instructions? Not vague? |
-| LLM Best Practices | Freedom level match? Grounding? Ambiguity handling? |
-| Prompt Compliance | Verbosity limits? "Do not" list? No fabrication? Schema? Self-check? |
-| **XML Structure Enforcement** | XML tags for verbosity? scope? extraction? updates? (GPT-5.2+) |
-| Conversational/Multi-Phase | If has phases: constraints at TOP? Stop conditions (strong)? Scope drift prevention? Phase gates? **Constraint centralization?** **Prohibition language strength?** |
-| Audit Checklist | Execute all Fatal/Severe/Warning checks at end of file |
+**关键**：必须等待用户明确确认后才能进入阶段 4。
 
-#### For Memory Files (`type-memory.md`):
-| Check Category | Action |
-|----------------|--------|
-| Structure Validation | File location? Merge hierarchy? |
-| Import Syntax | Valid `@path` imports? |
-| Content Quality | Specific? Actionable? Not vague? |
-| Instruction Quality | Verbosity constraints? Scope boundaries? |
+### 阶段 4：全面审计
 
-#### For Skills (`type-skill.md`):
-| Check Category | Action |
-|----------------|--------|
-| Directory Validation | SKILL.md exists? Correct filename? |
-| Frontmatter | name (≤64 chars), description (≤1024 chars, character count not bytes), triggers in description? |
-| Body Size | SKILL.md: ≤500 ideal, >625 warning. References: no limit, evaluate by content |
-| Script Integrity | Declared scripts exist? Imports valid? Shebang? Error handling? |
-| References | Has "when to read" guidance? |
-| Conversational/Multi-Phase | If body has phases: apply checks from `type-prompt.md` including **constraint centralization**, **stop condition strength**, **prohibition language** |
+用户确认后，执行完整审计流程（详见 `workflow-execution.md`）：
+1. 全面扫描/提取文件内容
+2. 加载规则与清单
+3. 执行所有检查项
+4. 问题验证与过滤
+5. 生成修复建议
 
-#### For Plugins (`type-plugin.md`):
-| Check Category | Action |
-|----------------|--------|
-| Structure | plugin.json in .claude-plugin/? Components at root? |
-| Path Variables | Uses relative paths or env variables? No hardcoded absolute paths? |
-| Commands | Valid frontmatter? allowed-tools valid? |
-| Agents | name, description, tools valid? |
-| Hooks | Wrapper format? Valid matchers? Scripts exist? |
-| MCP/LSP | Valid JSON? Paths correct? No hardcoded secrets? |
+### 阶段 5：报告与修复
 
-### Step 4: Execute Cross-Cutting Checks (Multi-file Systems)
+1. 生成并保存审计报告
+2. 显示摘要和操作提示
+3. 等待用户选择修复项
+4. 应用用户确认的修复
 
-**For Skills, Plugins, Composites, execute ALL checks from:**
+## 概述
 
-#### From `cross-design-coherence.md`:
-| Check | Action |
-|-------|--------|
-| Full Directory Scan | Enumerate ALL files, classify each, build rule inventory |
-| Design Philosophy | Extract principles from all files, check consistency |
-| Rule Propagation | Global rules applied in local files? |
-| Conflict Detection | Same-file contradictions? Cross-file contradictions? |
-| Structural Redundancy | Repeated sections? Duplicate tables? Parallel content? → centralize |
-| Red Flags | SKILL.md >625 lines? Scattered rules (>3 files)? Circular deps? |
+AI 编程助手配置的综合审计系统：
 
-#### From `cross-progressive-loading.md`:
-| Check | Action |
-|-------|--------|
-| Content Level Audit | L1 ≤100 words? L2 ≤500 lines? L3: evaluate by content nature |
-| Content Placement | Core workflow in L2? Edge cases in L3? |
-| Reference Guidance | Each reference has "when to read"? |
-| Anti-Patterns | Metadata bloat? Monolithic body? Essential in L3? |
+| 内容类型 | 识别方式 | 规则文件 |
+|----------|----------|----------|
+| **任意文本/文件** | 粘贴文本或任意文件（任意文件名） | `type-prompt.md` |
+| **AGENTS.md** | Codex 代理指令 | `type-memory.md` |
+| **CLAUDE.md** | Claude Code 记忆文件 | `type-memory.md` |
+| **GEMINI.md** | Gemini CLI 上下文文件 | `type-memory.md` |
+| **技能** | 包含 `SKILL.md` 的目录 | `type-skill.md` |
+| **插件** | 包含 `.claude-plugin/` 的目录 | `type-plugin.md` |
+| **复合** | 记忆文件 + skills/ | `cross-composite.md` |
 
-#### From `cross-composite.md`:
-| Check | Action |
-|-------|--------|
-| Reference Integrity | All cross-file refs valid? |
-| Terminology Consistency | Same concept = same term across files? |
-| Numbering Consistency | Sequential across all files? No duplicates? |
-| Script Integrity | All declared scripts exist? Imports valid? |
+## 核心原则
 
-### Step 5: Issue Verification (5-Point Check)
+> **来源**：基于最新 GPT 提示词指南 (openai-cookbook/examples/gpt-5)
+> **完整详情**：见 `references/methodology-core.md`
 
-For each suspected issue, verify ALL points:
-1. **Concrete scenario** - Can describe specific failure?
-2. **Design scope** - Within intended boundaries?
-3. **Functional capability** - Does implementation match claimed capability?
-4. **Flaw vs choice** - Unintentional error or valid design?
-5. **Threshold met** - Above quantified threshold?
+### 原则 0：GPT 提示词指南合规性（必须）
 
-If ANY fails → Discard the issue (move to Filtered)
+> **关键**：这是主要审计标准。每次审计都必须检查这些项目。
 
-**For "missing/incomplete" issues**: Re-read the source content fully before confirming. ASCII diagrams are prone to parsing errors on first scan.
+| 检查项 | 检查内容 | 严重性 |
+|--------|----------|--------|
+| 详尽约束 | 存在明确的长度限制 | Severe |
+| 范围纪律 | 存在明确的边界或禁止列表 | Severe |
+| 停止条件 | 多阶段内容在阶段门有强停止语言 | Severe |
+| 约束集中 | 关键规则集中，不散布在超过 3 处 | Severe |
+| 禁止语言 | 关键约束使用强语言 | Warning |
+| 禁止捏造 | 事实任务有接地指令 | Severe |
+| **结构化标签块** | 角括号标签 (`<tag>...</tag>`) 包裹关键约束 | Warning |
 
-### Step 6: Fix Proposal Verification (Principle Check)
+**结构化标签块（最佳实践）**：
 
-**CRITICAL**: Before outputting ANY fix proposal, verify it against core principles:
+| 提示词类型 | 建议：标签块包裹... | 缺失时严重性 |
+|------------|---------------------|--------------|
+| 所有有详尽规则的 | 长度/格式约束 | Info |
+| 所有有范围规则的 | 范围边界 | Info |
+| 代理/多阶段 | 代理通信规则 | Warning |
+| 数据提取 | 输出模式 | Warning |
+| 事实/接地 | 防幻觉 | Info |
 
-| Check | Question | If NO → |
-|-------|----------|---------|
-| Occam's Razor | Is this addition truly necessary? Could the goal be achieved by DELETE/MERGE/MODIFY instead of ADD? | Reconsider fix approach |
-| AI Inference | Can AI infer the correct behavior from existing examples/context/patterns? | Do NOT add explicit rule |
-| Hardcoding Check | Is this adding hardcoded values (e.g., "≤5 bullets", "≤200 words") where AI should judge based on context? | Remove hardcoded values |
-| Prohibition Check | Is this adding "do not" rules where AI already understands from intent/context? | Remove unnecessary prohibition |
-| Example Redundancy | Does the original design already convey intent through examples/structure? | Do NOT add redundant rules |
+### 原则 1：五点验证法
 
-**Verification Process**:
-1. For each proposed fix, ask: "If I remove this fix, would AI still produce correct output based on existing content?"
-2. If YES → The fix is unnecessary, discard it
-3. If NO → Verify the fix uses minimal intervention (prefer MODIFY over ADD)
+标记任何问题之前，验证：
+1. **具体场景** - 能描述具体的失败吗？
+2. **设计范围** - 在预期边界内吗？
+3. **功能能力** - 能真正做到它声称的吗？
+4. **缺陷 vs 选择** - 无意错误还是有效选择？
+5. **达到阈值** - 超过量化阈值吗？
 
-**If ANY check fails → Revise or discard the fix proposal**
+任何一点失败 → 丢弃该问题
 
-### Step 7: Generate Report
+### 原则 2：奥卡姆剃刀
 
-Follow `references/ref-output-format.md` for structure.
+**"如非必要，勿增实体。"**
 
-**Section 2 Cross-Cutting Analysis MUST include:**
-- Naming & Numbering: actual check results with specific findings
-- TOC-Content Match: comparison results
-- Reference Integrity: broken refs listed
-- (For multi-file) Design Coherence, Progressive Loading results
+修复优先级：删除 > 合并 > 重构 > 修改 > 添加
 
-**Section 3 Issue Inventory MUST include:**
-- Verification Statistics: "Scanned X → Verified Y → Filtered Z"
-- Both Confirmed and Filtered issues with filter reasons
+### 原则 3：AI 能力
 
-### Step 8: Wait for User Confirmation (PHASE GATE)
+- AI 能推断：同义词、上下文、标准术语
+- AI 不能：3 步以上推理、领域特定变体
+- 如 <30% 会误解 → 豁免问题
 
-> **CRITICAL**: After generating the report, STOP and wait for user input. Do NOT apply any fixes automatically.
+### 原则 4：尺寸容忍（仅 SKILL.md 正文）
 
-**User interaction flow:**
-1. Output complete audit report (Sections 0-5)
-2. **STOP** - Wait for user to select which fixes to apply
-3. Only after user confirms (e.g., "1", "1,2", "all") → Apply selected fixes
-4. If user provides no selection → Do nothing, wait
+| 范围 | 状态 |
+|------|------|
+| ≤500 行 | 理想 |
+| 500-550（≤10% 超出） | **不是问题** |
+| 550-625（10-25% 超出） | 仅 Info |
+| >625 行 | Warning |
 
-## Reference Files
+> **注意**：参考文件没有官方行数限制。根据内容性质评估。
 
-### Layer 0: Core Methodology (Immutable Principles)
+## 审计执行
 
-Read `references/methodology-core.md` when:
-- Need to verify if something is truly an issue
-- Deciding fix priority
-- Understanding AI capability boundaries
+> **详细步骤指南**：见 `references/workflow-execution.md`
+> **检查项注册表**：见 `references/registry/index.md`
+> **类型执行清单**：见 `references/checklists/index.md`
 
-### Layer 1: Universal Rules (Common Rules)
+### 新架构：注册表 + 清单
 
-Read `references/rules-universal.md` when:
-- Starting any audit
-- Need Should Flag / Should NOT Flag patterns
-- Checking size thresholds
+<audit_architecture>
+**检查项注册表 (Registry)**：每个检查项有唯一 ID，在注册表中定义一次
+**类型执行清单 (Checklist)**：按内容类型列出要执行的检查项 ID
 
-### Layer 2: Type-Specific Rules (Type Rules)
+执行流程：
+1. 识别内容类型 → 加载对应 checklist
+2. 按 checklist 中的 ID 加载 registry 规则
+3. 执行所有必须检查项 + 条件检查项
+4. 按 registry 类别输出执行证据
+</audit_architecture>
 
-| File | Read When |
-|------|-----------|
-| `references/type-prompt.md` | Auditing standalone prompts |
-| `references/type-memory.md` | Auditing AGENTS.md, CLAUDE.md, GEMINI.md |
-| `references/type-skill.md` | Auditing skills (SKILL.md, scripts) |
-| `references/type-plugin.md` | Auditing plugins, hooks, MCP, LSP |
+### 注册表类别
 
-### Layer 3: Cross-Cutting Rules (Cross-Cutting Rules)
+| 前缀 | 类别 | 注册表文件 |
+|------|------|-----------|
+| N | 命名 Naming | `registry/reg-naming.md` |
+| B | 编号 Numbering | `registry/reg-numbering.md` |
+| R | 引用 Reference | `registry/reg-reference.md` |
+| S | 结构 Structure | `registry/reg-structure.md` |
+| P | Prompt 质量 | `registry/reg-prompt.md` |
+| X | 安全 Security | `registry/reg-security.md` |
+| T | 运行时 Runtime | `registry/reg-runtime.md` |
+| F | 格式 Format | `registry/reg-format.md` |
+| L | 语言 Language | `registry/reg-language.md` |
+| K | Skill 特定 | `registry/reg-skill.md` |
+| G | Plugin 特定 | `registry/reg-plugin.md` |
 
-| File | Read When |
-|------|-----------|
-| `references/cross-composite.md` | Auditing multi-component systems |
-| `references/cross-design-coherence.md` | Checking design consistency |
-| `references/cross-progressive-loading.md` | Evaluating content placement |
+### 类型执行清单
 
-### Layer 4: Reference Materials (Reference Materials)
+| 内容类型 | 执行清单 | 检查项数 |
+|----------|----------|----------|
+| Prompt | `checklists/checklist-prompt.md` | ~51 |
+| Memory | `checklists/checklist-memory.md` | ~54 |
+| Skill | `checklists/checklist-skill.md` | ~111 |
+| Plugin | `checklists/checklist-plugin.md` | ~126 |
+| Composite | `checklists/checklist-composite.md` | ~150+ |
 
-| File | Read When |
-|------|-----------|
-| `references/ref-output-format.md` | Generating audit report |
-| `references/ref-checklist.md` | Need dimension checklist |
-| `references/ref-quick-reference.md` | Quick lookup of patterns |
+### 快速参考
 
-## Special Reminders
+| 步骤 | 操作 | 关键输出 |
+|------|------|----------|
+| 1 | 获取 GPT 提示词指南 | 指南版本，必须检查项 |
+| 2 | 检测与分类 | 内容类型，要加载的清单 |
+| **2B** | **加载清单与注册表** | **"已加载：checklist-{type}.md，注册表：[列表]"** |
+| 3 | 执行通用检查 | 按清单必需项 |
+| **3B** | **执行证据检查点** | **类别汇总表 + 每类别的检查 ID 详情** |
+| 4 | 执行类型特定检查 | 按清单条件项 |
+| 5 | 执行交叉检查 | 多文件系统检查 |
+| 6 | 问题验证 | 五点检查，过滤无效 |
+| 7 | 修复建议验证 | 奥卡姆剃刀，AI 能力 |
+| **7B** | **引用回查验证** | **验证了 N 个问题，通过/修正/删除统计** |
+| 8 | 生成报告 | 按 ref-output-format.md，按注册表分组 |
+| **8B** | **保存报告到文件** | **审计报告已保存至: {完整路径}** |
+| 9 | 等待确认 | 在阶段门停止 |
 
-### Key References by Topic
+### 关键执行规则
 
-| Topic | Reference File |
-|-------|---------------|
-| Report structure & format | `ref-output-format.md` |
-| Issue filtering rules | `rules-universal.md` → Should NOT Flag |
-| False positive prevention | `rules-universal.md` → Verification Questions |
-| Size thresholds | `rules-universal.md` → Universal Size Thresholds |
-| Checklist by dimension | `ref-checklist.md` |
-| LLM prompting best practices | `type-prompt.md` → LLM Prompting Best Practices |
+1. **GPT 指南合规性优先** - 始终先检查 P-001~P-008，再进行其他检查
+2. **按清单加载** - 使用清单确定执行哪些注册表项
+3. **并行读取** - 扫描多文件时并行读取
+4. **需要证据** - 每个发现需要文件:行号引用 + 检查 ID
+5. **按注册表输出** - 按注册表类别分组结果 (N, B, R, S, P, X, T, F, L, K, G)
+6. **五点过滤** - 丢弃未通过任何验证点的问题
+7. **在门处停止** - 应用修复前等待用户确认
 
-### Quick Filtering Rules
+## 参考文件
 
-| Condition | Action |
-|-----------|--------|
-| ≤10% over recommended | NOT an issue |
-| AI can infer | NOT an issue |
-| Design choice | NOT an issue |
+### 第 0 层：核心方法论
 
-## External Documentation
+| 文件 | 何时读取 |
+|------|----------|
+| `methodology-core.md` | 验证某事是否真的是问题；决定修复优先级 |
 
-| Platform | Source |
-|----------|--------|
+### 第 1 层：检查项注册表（新）
+
+| 文件 | 何时读取 |
+|------|----------|
+| `registry/index.md` | 所有注册表和 ID 前缀概述 |
+| `registry/reg-naming.md` | N-xxx：命名检查 |
+| `registry/reg-numbering.md` | B-xxx：编号检查 |
+| `registry/reg-reference.md` | R-xxx：引用完整性检查 |
+| `registry/reg-structure.md` | S-xxx：结构完整性检查 |
+| `registry/reg-prompt.md` | P-xxx：Prompt 质量检查 |
+| `registry/reg-security.md` | X-xxx：安全与合规检查 |
+| `registry/reg-runtime.md` | T-xxx：运行时行为检查 |
+| `registry/reg-format.md` | F-xxx：格式与编码检查 |
+| `registry/reg-language.md` | L-xxx：语言表达检查 |
+| `registry/reg-skill.md` | K-xxx：Skill 特定检查 |
+| `registry/reg-plugin.md` | G-xxx：Plugin 特定检查 |
+
+### 第 2 层：类型执行清单（新）
+
+| 文件 | 何时读取 |
+|------|----------|
+| `checklists/index.md` | 所有清单概述 |
+| `checklists/checklist-prompt.md` | 审计提示词/文本内容 |
+| `checklists/checklist-memory.md` | 审计 AGENTS.md、CLAUDE.md、GEMINI.md |
+| `checklists/checklist-skill.md` | 审计技能 (SKILL.md、scripts) |
+| `checklists/checklist-plugin.md` | 审计插件 (hooks、MCP、LSP) |
+| `checklists/checklist-composite.md` | 审计多组件系统 |
+
+### 第 3 层：通用规则（遗留 - 详细解释）
+
+| 文件 | 何时读取 |
+|------|----------|
+| `rules-universal.md` | 通用规则的详细解释 |
+| `rules-structure-integrity.md` | 结构完整性详细指导 |
+| `rules-runtime-behavior.md` | 运行时行为详细指导 |
+
+### 第 4 层：类型特定规则（遗留 - 详细解释）
+
+| 文件 | 何时读取 |
+|------|----------|
+| `type-prompt.md` | 审计独立提示词 |
+| `type-memory.md` | 审计 AGENTS.md、CLAUDE.md、GEMINI.md |
+| `type-skill.md` | 审计技能 (SKILL.md、scripts) |
+| `type-plugin.md` | 审计插件、hooks、MCP、LSP |
+
+### 第 5 层：交叉规则（遗留）
+
+| 文件 | 何时读取 |
+|------|----------|
+| `cross-composite.md` | 审计多组件系统 |
+| `cross-design-coherence.md` | 检查设计一致性 |
+| `cross-progressive-loading.md` | 评估内容放置 |
+
+### 第 6 层：参考材料
+
+| 文件 | 何时读取 |
+|------|----------|
+| `workflow-execution.md` | 需要详细步骤指南 |
+| `ref-output-format.md` | 生成审计报告 |
+| `ref-checklist.md` | 遗留维度 → 源文件映射 |
+| `ref-quick-reference.md` | 快速查找模式 |
+| `ref-gpt-prompting-standard.md` | 对照 GPT-5.2 标准审计任何非脚本文本内容 |
+| `ref-codex-skills-standard.md` | 对照 Codex CLI Skills 规范审计技能 |
+
+## 外部文档
+
+| 平台 | 来源 |
+|------|------|
 | Claude Code | github.com/anthropics/claude-code |
 | Codex CLI | github.com/openai/codex/tree/main/codex-cli |
 | Gemini CLI | github.com/google-gemini/gemini-cli |
-| Anthropic Docs | docs.anthropic.com |
-| OpenAI Docs | github.com/openai/openai-cookbook |
-| GPT Prompting Resources | github.com/openai/openai-cookbook/tree/main/examples/gpt-5 |
+| GPT 提示词资源 | github.com/openai/openai-cookbook/tree/main/examples/gpt-5 |
+| **GPT-5.2 提示词指南** | github.com/openai/openai-cookbook/blob/main/examples/gpt-5/gpt-5-2_prompting_guide.ipynb |
+| **Codex CLI Skills 规范** | agentskills.io/specification |
 
-> **Version Policy**: Always use the **latest version** of GPT prompting guides as authoritative source. When multiple versions exist in the gpt-5 directory, prefer the highest version number (e.g., gpt-5.2 over gpt-5.1 over gpt-5). The directory contains prompting guides, troubleshooting guides, and optimization cookbooks.
+> **版本策略**：始终使用**最新版本**的 GPT 提示词指南作为权威来源。
+
+## 审计标准摘要
+
+| 内容类型 | 主要标准 | 参考文件 |
+|----------|----------|----------|
+| 所有非脚本文本 | GPT-5.2 提示词指南 | `ref-gpt-prompting-standard.md` |
+| 技能 (SKILL.md) | Codex CLI Skills 规范 | `ref-codex-skills-standard.md` |
+| 带技能的插件 | 两个标准 | 两个参考文件 |
+
+**关键审计要点**：
+- **GPT-5.2 标准**：详尽约束、范围纪律、结构化标签、反模式、多阶段规则
+- **Codex Skills 标准**：目录结构、frontmatter 字段、命名约定、渐进加载

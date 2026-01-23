@@ -1,704 +1,95 @@
 # Hello-AuditKit
 
 <div align="center">
+  <img src="./readme_images/01-hero-banner.svg" alt="Hello-AuditKit" width="720">
 
-**Enterprise-grade audit system for AI coding assistant configurations — catch issues before they cause problems**
+  **Evidence-first audit system for AI coding assistant configurations (prompts / memory files / skills / plugins)**
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-[![Documentation](https://img.shields.io/badge/docs-CC%20BY%204.0-green.svg)](./hello-auditkit/references/)
-[![Version](https://img.shields.io/badge/version-1.1.0-orange.svg)](./hello-auditkit/SKILL.md)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/hellowind777/hello-auditkit/pulls)
+  [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+  [![Version](https://img.shields.io/badge/version-2.0.0-orange.svg)](./hello-auditkit/SKILL.md)
+  [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/hellowind777/hello-auditkit/pulls)
 
-[简体中文](./README_CN.md) · [English](./README.md) · [Quick Start](#-quick-start) · [Documentation](#-documentation)
-
+  [简体中文](./README_CN.md) · [English](./README.md)
 </div>
 
 ---
 
-## 🎯 Why Hello-AuditKit?
+## What This Skill Audits
 
-**The Problem:** AI coding assistant configurations (prompts, skills, plugins) often contain hidden issues — broken references, contradictory rules, bloated content — that cause unexpected behavior.
+- **Prompt / any text file** (pasted text, or any file path)
+- **Memory files**: `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`
+- **Skills**: directories containing `SKILL.md`
+- **Plugins**: directories containing `.claude-plugin/` (and related config)
+- **Composite systems**: multi-file setups (e.g., memory + skills/plugins)
 
-**The Solution:** A rigorous audit system with 5-point verification that catches real issues while filtering out false positives.
+## Core Ideas (What Makes It Different)
 
-| Challenge | Without Hello-AuditKit | With Hello-AuditKit |
-|-----------|------------------------|---------------------|
-| **Broken References** | Silent failures, missing context | All refs verified, broken refs flagged |
-| **Rule Conflicts** | Contradictory behavior | Conflicts detected with resolution suggestions |
-| **Content Bloat** | Slow response, context overflow | Size thresholds with tiered warnings |
-| **Vague Instructions** | Inconsistent AI behavior | Ambiguity patterns detected |
-| **False Positives** | Noise drowns real issues | 5-point verification filters non-issues |
+- **GPT Prompting Guide compliance as a primary standard** (online-first; fallback to built-in rules when offline)
+- **5-point verification** to filter false positives before reporting issues
+- **Evidence-first reporting**: every finding must be anchored to *file + line* and backchecked
+- **No auto-fix**: fixes are proposed; nothing is applied until the user explicitly confirms
 
-### 💡 Best For
+## Quick Start (Codex CLI)
 
-- ✅ **Prompt Engineers** reviewing complex system prompts
-- ✅ **Codex CLI / Claude Code Users** auditing memory files and skills
-- ✅ **Plugin Developers** validating hooks, commands, and MCP configurations
-- ✅ **Teams** establishing quality standards for AI configurations
+### 1) Install
 
-### ⚠️ Not For
+Copy the `hello-auditkit/` folder into your Codex skills directory:
 
-- ❌ General code review (use dedicated linters)
-- ❌ Runtime monitoring (this is static analysis)
-- ❌ Unattended auto-fixing (fixes are proposed; apply only after explicit confirmation)
-
----
-
-## ✨ Features
-
-### 🎯 Core Capabilities
-
-<table>
-<tr>
-<td width="50%">
-
-**🔍 Multi-Type Audit**
-
-Comprehensive coverage for all AI assistant configurations:
-- Any text/file (pasted directly, or loaded from any file regardless of filename)
-- Memory files (AGENTS.md, CLAUDE.md, GEMINI.md)
-- Skills (SKILL.md + references)
-- Plugins (hooks, commands, agents, MCP/LSP)
-- Composites (multi-file systems: memory + skills/plugins)
-
-**Your benefit:** One tool for your entire AI configuration ecosystem
-
-</td>
-<td width="50%">
-
-**✅ 5-Point Verification**
-
-Every issue must pass rigorous validation:
-- Concrete failure scenario exists
-- Within design scope
-- Functional capability verified
-- Design flaw, not choice
-- Above severity threshold
-
-**Your benefit:** No false positives drowning real issues
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-**📋 GPT Guide Compliance**
-
-Mandatory checks based on latest GPT Prompting Guide:
-- Verbosity constraints present
-- Scope discipline with "do not" list
-- Stop conditions for multi-phase content
-- No fabrication instructions
-
-**Your benefit:** Industry-standard prompt quality
-
-</td>
-<td width="50%">
-
-**🔄 Conversational/Multi-Phase**
-
-Specialized checks for multi-phase content:
-- Constraint centralization (≤3 locations)
-- Stop condition strength validation
-- Prohibition language strength
-- Phase gate verification
-
-**Your benefit:** Reliable multi-turn AI behavior
-
-</td>
-</tr>
-<tr>
-<td width="50%">
-
-**📐 Occam's Razor Fixes**
-
-Fix priority hierarchy: DELETE > MERGE > RESTRUCTURE > MODIFY > ADD
-
-**Your benefit:** Simpler, cleaner configurations
-
-</td>
-<td width="50%">
-
-**🌐 Multi-Language Output**
-
-Supports: en-US, zh-CN, zh-TW, ja-JP, ko-KR, es-ES, fr-FR, de-DE
-
-**Your benefit:** Audit reports in your preferred language
-
-</td>
-</tr>
-</table>
-
-### 📊 By the Numbers
-
-- **5-point** verification prevents false positives
-- **7** content types supported (any text/file, AGENTS.md, CLAUDE.md, GEMINI.md, skills, plugins, composites)
-- **4** severity levels with quantified thresholds (Must Fix / Should Fix / Optional / Filtered)
-- **Zero** guesswork — every issue backed by concrete scenarios
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- Codex CLI or Claude Code installed
-- Target configuration files to audit
-
-### Installation
-
-**Step 1: Copy skill to your assistant's skills directory**
-
-```bash
+```powershell
 # Windows (PowerShell)
-Copy-Item -Recurse "hello-auditkit" "$env:USERPROFILE\.codex\skills\"
-Copy-Item -Recurse "hello-auditkit" "$env:USERPROFILE\.claude\skills\"
+Copy-Item -Recurse -Force "./hello-auditkit" "$env:USERPROFILE\.codex\skills\"
+```
 
+```bash
 # macOS/Linux
-cp -r hello-auditkit ~/.codex/skills/
-cp -r hello-auditkit ~/.claude/skills/
+cp -r ./hello-auditkit ~/.codex/skills/
 ```
 
-**Step 2: Verify installation**
+### 2) Use
 
-```bash
-# Restart Codex CLI / Claude Code and check skill is available
-# The skill should auto-trigger on audit-related requests
-```
+In Codex CLI, invoke the skill and provide the target you want to audit:
 
-**Step 3: Start auditing**
+- Example prompts:
+  - `审计这个文件: ./AGENTS.md`
+  - `检查这个技能目录: ./some-skill/`
+  - `验证这个插件配置: ./my-plugin/`
 
-```bash
-# In Codex CLI / Claude Code, simply request an audit:
-"Audit my CLAUDE.md file"
-"Review this skill for quality issues"
-"Check this plugin configuration"
-```
+### 3) Output
 
-**Notes:**
-- If you invoke the skill without a target, it will show a welcome message and ask for a file path, directory path, or pasted content.
-- **Phase gate:** After generating the report, it **stops**. To apply fix proposals (if any), reply with `1`, `1,2`, `1-3`, or `all`.
-
-### First Use Example
-
-```
-User: Audit my CLAUDE.md file
-
-Hello-AuditKit:
-1. Detects content type → Memory File
-2. Loads type-memory.md rules
-3. Executes universal checks (naming, references, size)
-4. Applies 5-point verification
-5. Generates structured report
-```
-
-**Expected Output:**
-```
-## Audit Report: CLAUDE.md
-
-### 1. Assessment Overview
-| Dimension | Score | Notes |
-|-----------|-------|-------|
-| Organization | ⭐⭐⭐⭐☆ | Clear structure, minor improvements possible |
-| Completeness | ⭐⭐⭐⭐⭐ | All required sections present |
-...
-
-### 3. Issue Inventory
-| Category | Count |
-|----------|-------|
-| 🔴 Must Fix | 0 |
-| 🟡 Should Fix | 2 |
-| 🟢 Optional | 3 |
-| ⚪ Filtered | 5 |
-
-### 5. Conclusion
-✅ Pass — No critical issues found
-```
-
-### 📸 Latest Usage Screenshot
-
-![Hello-AuditKit latest usage screenshot](./screenshot.png)
+- The audit report is **saved to a file** (see `hello-auditkit/scripts/save_report.py`).
+- Terminal output is **progress-only** (no full report dump).
 
 ---
 
-## 🔧 How It Works
+## Documentation
 
-### Architecture Overview
+- Skill entry point: `hello-auditkit/SKILL.md`
+- Workflow guide: `hello-auditkit/references/workflow-execution.md`
+- Registries (rule IDs): `hello-auditkit/references/registry/`
+- Type checklists: `hello-auditkit/references/checklists/`
 
-<details>
-<summary><strong>📊 Click to view full architecture diagram</strong></summary>
+## Repository Layout
 
-```mermaid
-flowchart TD
-    Start([User Request]) --> Detect{Content Type?}
+| Path | Purpose |
+|------|---------|
+| `hello-auditkit/SKILL.md` | Skill definition + phases + constraints |
+| `hello-auditkit/references/` | Audit methodology, rules, checklists, registries |
+| `hello-auditkit/scripts/save_report.py` | Save report to file with standardized naming |
+| `hello-auditkit/assets/` | Reserved for future assets |
+| `hello-auditkit/output/` | Runtime cache/output directory (gitignored except `.gitkeep`) |
 
-    Detect -->|"Prompt"| LoadPrompt[Load type-prompt.md]
-    Detect -->|"Memory"| LoadMemory[Load type-memory.md]
-    Detect -->|"Skill"| LoadSkill[Load type-skill.md]
-    Detect -->|"Plugin"| LoadPlugin[Load type-plugin.md]
+## Contributing
 
-    LoadPrompt --> Universal[Execute Universal Checks]
-    LoadMemory --> Universal
-    LoadSkill --> Universal
-    LoadPlugin --> Universal
+See `CONTRIBUTING.md`.
 
-    Universal --> TypeSpecific[Execute Type-Specific Checks]
-    TypeSpecific --> CrossCutting{Multi-file?}
+## License
 
-    CrossCutting -->|Yes| Cross[Execute Cross-Cutting Checks]
-    CrossCutting -->|No| Verify
-    Cross --> Verify
+MIT. See `LICENSE`.
 
-    Verify[5-Point Verification] --> Filter{Pass All 5?}
-    Filter -->|Yes| Confirm[✅ Confirmed Issue]
-    Filter -->|No| Discard[⚪ Filtered]
-
-    Confirm --> Report[Generate Report]
-    Discard --> Report
-
-    style Start fill:#e3f2fd
-    style Confirm fill:#4caf50,color:#fff
-    style Discard fill:#fff3e0
-    style Report fill:#4caf50,color:#fff
-```
-
-</details>
-
-### Audit Process Explained
-
-<table>
-<tr><th>Phase</th><th>What It Does</th><th>When It Runs</th><th>Output</th></tr>
-
-<tr>
-<td><strong>1. Detection</strong></td>
-<td>
-• Scan target path<br>
-• Identify content type<br>
-• Load appropriate rules
-</td>
-<td>Start of every audit</td>
-<td>
-• Content type (prompt/memory/skill/plugin)<br>
-• Rule files to apply
-</td>
-</tr>
-
-<tr>
-<td><strong>2. Universal Checks</strong></td>
-<td>
-• Naming & numbering<br>
-• Reference integrity<br>
-• Size thresholds<br>
-• Security scan
-</td>
-<td>Every audit</td>
-<td>
-• Check results table<br>
-• Suspected issues list
-</td>
-</tr>
-
-<tr>
-<td><strong>3. Type-Specific</strong></td>
-<td>
-• Apply type rules<br>
-• Structure validation<br>
-• Content quality checks
-</td>
-<td>Based on content type</td>
-<td>
-• Type-specific findings<br>
-• Additional suspected issues
-</td>
-</tr>
-
-<tr>
-<td><strong>4. Verification</strong></td>
-<td>
-• 5-point check each issue<br>
-• Filter false positives<br>
-• Assign severity
-</td>
-<td>After all checks</td>
-<td>
-• Confirmed issues<br>
-• Filtered issues with reasons
-</td>
-</tr>
-
-</table>
-
-**Real Example: Reference Integrity Check**
-
-```
-Before (Suspected):
-  - Found: @missing-file.md reference
-  - Found: #broken-anchor link
-  - Found: Step 3 referenced but Step 2 missing
-
-After (Verified):
-  ✅ @missing-file.md → Confirmed (file doesn't exist)
-  ⚪ #broken-anchor → Filtered (AI can infer from context)
-  ✅ Step gap → Confirmed (causes confusion)
-```
-
----
-
-## 📖 Documentation
-
-### Core Concepts
-
-<table>
-<tr><th>Concept</th><th>Definition</th><th>Why It Matters</th></tr>
-
-<tr>
-<td><strong>GPT Guide Compliance</strong></td>
-<td>Mandatory checks: verbosity constraints, scope discipline, stop conditions, no fabrication</td>
-<td>Ensures prompts meet industry-standard quality</td>
-</tr>
-
-<tr>
-<td><strong>5-Point Verification</strong></td>
-<td>Every issue must pass: scenario test, scope check, functional capability, flaw vs choice, threshold check</td>
-<td>Eliminates false positives that waste your time</td>
-</tr>
-
-<tr>
-<td><strong>Occam's Razor</strong></td>
-<td>Fix priority: DELETE > MERGE > RESTRUCTURE > MODIFY > ADD</td>
-<td>Keeps configurations lean and maintainable</td>
-</tr>
-
-<tr>
-<td><strong>Progressive Loading</strong></td>
-<td>L1 (metadata) → L2 (body) → L3 (references) → L4 (scripts)</td>
-<td>Optimizes context window usage</td>
-</tr>
-
-<tr>
-<td><strong>Size Tolerance</strong></td>
-<td>≤10% over limit = NOT an issue</td>
-<td>Avoids nitpicking, focuses on real problems</td>
-</tr>
-
-<tr>
-<td><strong>Grounding</strong></td>
-<td>Base findings on actual content; never fabricate details</td>
-<td>Ensures audit accuracy and trustworthiness</td>
-</tr>
-
-</table>
-
-### Severity Levels
-
-| Level | Icon | Criteria |
-|-------|------|----------|
-| Must Fix | 🔴 | Function broken, or ≥60% executors fail |
-| Should Fix | 🟡 | Quality impact, or ≥40% suboptimal results |
-| Optional | 🟢 | Enhances experience, not required |
-| Filtered | ⚪ | Did not pass 5-point verification |
-
-### Reference Files
-
-| File | Read When |
-|------|-----------|
-| `methodology-core.md` | Understanding verification principles |
-| `rules-universal.md` | Universal checks, size thresholds |
-| `type-prompt.md` | Auditing standalone prompts |
-| `type-memory.md` | Auditing AGENTS.md, CLAUDE.md, GEMINI.md |
-| `type-skill.md` | Auditing skills |
-| `type-plugin.md` | Auditing plugins, hooks, MCP, LSP |
-| `cross-*.md` | Multi-file system audits |
-| `ref-output-format.md` | Report structure specification |
-
----
-
-## ❓ FAQ
-
-<details>
-<summary><strong>Q: What content types can Hello-AuditKit audit?</strong></summary>
-
-**A:**
-- Prompts (any text/markdown instructions)
-- Memory files (AGENTS.md, CLAUDE.md, GEMINI.md)
-- Skills (directories with SKILL.md)
-- Plugins (directories with .claude-plugin/)
-- Composite systems (memory + skills combination)
-</details>
-
-<details>
-<summary><strong>Q: How is this different from a linter?</strong></summary>
-
-**A:** Linters check syntax and style. Hello-AuditKit audits semantic quality — rule conflicts, broken references, design coherence, and AI-specific best practices like freedom level matching.
-</details>
-
-<details>
-<summary><strong>Q: What does "5-point verification" mean?</strong></summary>
-
-**A:** Every suspected issue must pass 5 checks before being confirmed:
-1. Can you describe a concrete failure scenario?
-2. Is this within the design scope?
-3. Does the implementation match claimed capability?
-4. Is this a flaw (unintentional) or a choice (intentional)?
-5. Does it meet the severity threshold?
-
-If any check fails, the issue is filtered out.
-</details>
-
-<details>
-<summary><strong>Q: Why are some issues filtered out?</strong></summary>
-
-**A:** Common filter reasons:
-- **AI Capable (FR-AI)**: AI can infer the correct behavior from context
-- **Design Choice (FR-DS)**: It's intentional, not a flaw
-- **Below Threshold (FR-TH)**: Impact is too small to matter
-- **Within Tolerance (FR-TOL)**: e.g., 504 lines when limit is 500 (≤10% over)
-</details>
-
-<details>
-<summary><strong>Q: Can I customize the audit rules?</strong></summary>
-
-**A:** Yes. The rules are in markdown files under `references/`. You can modify thresholds, add custom checks, or adjust severity levels.
-</details>
-
-<details>
-<summary><strong>Q: What languages are supported for output?</strong></summary>
-
-**A:** Configure `OUTPUT_LANGUAGE` in SKILL.md. Supported: en-US, zh-CN, zh-TW, ja-JP, ko-KR, es-ES, fr-FR, de-DE.
-</details>
-
-<details>
-<summary><strong>Q: Does it auto-fix issues?</strong></summary>
-
-**A:** No. Hello-AuditKit provides detailed fix proposals with before/after examples, but you apply them manually. This ensures you review changes before applying.
-</details>
-
-<details>
-<summary><strong>Q: How do I interpret the severity icons?</strong></summary>
-
-**A:**
-- 🔴 **Must Fix**: Blocks functionality or causes majority failures
-- 🟡 **Should Fix**: Impacts quality, affects many users
-- 🟢 **Optional**: Nice to have, not required
-- ⚪ **Filtered**: Not a real issue (failed verification)
-</details>
-
----
-
-## 🛠️ Troubleshooting
-
-### Skill Not Triggering
-
-**Problem:** Codex CLI / Claude Code doesn't recognize audit requests
-
-**Solution:**
-```bash
-# 1. Verify skill location
-ls ~/.codex/skills/hello-auditkit/SKILL.md
-ls ~/.claude/skills/hello-auditkit/SKILL.md
-
-# 2. Check SKILL.md frontmatter is valid
-# name, description, version fields must be present
-
-# 3. Restart Codex CLI / Claude Code
-```
-
----
-
-**Problem:** Audit reports in wrong language
-
-**Cause:** OUTPUT_LANGUAGE not set correctly
-
-**Solution:**
-```markdown
-# Edit hello-auditkit/SKILL.md, find this line:
-**OUTPUT_LANGUAGE: zh-CN**
-
-# Change to your preferred language:
-**OUTPUT_LANGUAGE: en-US**
-```
-
----
-
-**Problem:** Too many filtered issues
-
-**Cause:** Normal — 5-point verification is strict by design
-
-**Solution:**
-```markdown
-# Filtered issues are shown for transparency
-# If you believe an issue should be confirmed:
-1. Check the filter reason (FR-AI, FR-DS, etc.)
-2. Review the 5-point criteria in methodology-core.md
-3. If criteria are wrong for your use case, adjust thresholds
-```
-
----
-
-**Problem:** Size warnings for files just over limit
-
-**Cause:** Misunderstanding size tolerance
-
-**Solution:**
-```markdown
-# Size tolerance rules:
-# ≤500 lines: Ideal (no warning)
-# 500-550 (≤10% over): NOT an issue
-# 550-625 (10-25% over): Info only
-# 625-750 (>25% over): Warning
-# >750 lines: Severe
-
-# A 520-line file is within tolerance - no action needed
-```
-
----
-
-**Problem:** Missing cross-cutting checks
-
-**Cause:** Single-file audit doesn't trigger cross-cutting
-
-**Solution:**
-```bash
-# For composite systems, audit the parent directory:
-"Audit the entire skills directory"
-
-# Not just individual files:
-"Audit SKILL.md"  # Won't trigger cross-file checks
-```
-
----
-
-## 📈 Version History
-
-### Latest: 1.1.0 🎉
-
-**New Features:**
-- ✨ GPT-5.2 Compliance: XML tags enforcement for critical constraints
-- ✨ 5-Point Verification (added Functional Capability check)
-- ✨ GPT-5.2 specific checks (no task expansion, no rephrasing, design system exploration)
-- ✨ Table of Contents navigation in SKILL.md
-
-**Improvements:**
-- 📦 XML tags required for agentic/multi-phase prompts (`<output_verbosity_spec>`, `<design_and_scope_constraints>`, `<user_updates_spec>`, etc.)
-- 📦 Enhanced Prompt Compliance checks with XML structure enforcement
-- 📦 Expanded rules-universal.md and type-prompt.md with GPT-5.2 guidelines
-- 📦 Report output spec with strict section ordering and table formats
-
-### Previous: 1.0.2
-
-**New Features:**
-- ✨ GPT Prompting Guide Compliance as mandatory audit standard (Principle 0)
-- ✨ Grounding & No Fabrication principle (Principle 6)
-- ✨ Conversational/Multi-Phase content checks
-- ✨ Agentic Updates and Tool Parallelization guidance
-
-**Improvements:**
-- 📦 Step 0 elevated to MANDATORY STANDARD for GPT Guide compliance
-- 📦 Enhanced frontmatter validation (description ≤1024 chars, character count)
-- 📦 ASCII diagram parsing error handling in Step 5
-- 📦 Constraint centralization checks (≤3 locations)
-- 📦 Stop condition and prohibition language strength validation
-- 📦 Added explicit entry point + target selection (welcome prompt when no target)
-- 📦 Added phase gate requiring explicit user confirmation before applying any fixes
-
-### Previous: 2.0.0
-
-**New Features:**
-- ✨ Complete rule system reorganization
-- ✨ 5-point verification methodology
-- ✨ Progressive loading architecture (L1-L4)
-- ✨ Multi-language output support
-
-**Improvements:**
-- 📦 Separated type-specific rules into dedicated files
-- 📦 Added cross-cutting analysis modules
-- 📚 Comprehensive reference documentation
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Contribution Ideas
-
-- 🐛 Found a bug? [Report it](https://github.com/hellowind777/hello-auditkit/issues)
-- 💡 Have an idea? [Discuss it](https://github.com/hellowind777/hello-auditkit/discussions)
-- 📝 Improve docs? PRs for typos always welcome!
-- 🌍 Translate? We need help with other languages
-
----
-
-## 🔒 Security
-
-**We take security seriously.**
-
-- ✅ No secrets in configuration files
-- ✅ Path traversal prevention in reference loading
-- ✅ Input validation for all user-provided paths
-
-**Found a vulnerability?**
-- Email: security@hellowind.dev (private disclosure)
-- Do NOT create public issues for security bugs
-
----
-
-## 📜 License & Attribution (**Commercial use allowed, attribution required**)
-
-To ensure "commercial use allowed + attribution required", this project adopts a **dual-license** scheme:
-
-1. **Code** — **Apache License 2.0** © 2025 Hellowind
-   - Commercial use is allowed. You must retain **LICENSE** and **NOTICE** information in your distribution.
-   - Include a `NOTICE` in your distribution (example):
-     <pre>
-     This product includes "HelloAGENTS" (author: <a href="https://github.com/hellowind777/helloagents">Hellowind</a>), licensed under the Apache License 2.0.
-     </pre>
-
-2. **Documentation (README/PROJECTWIKI/Diagrams)** — **CC BY 4.0** © 2025 Hellowind
-   - Commercial use is allowed, but **attribution is required**; provide a license link and indicate whether changes were made.
-   - Suggested attribution when reusing documentation:
-     <pre>
-     Text/graphics adapted from "HelloAGENTS" — © 2025 <a href="https://github.com/hellowind777/helloagents">Hellowind</a>, CC BY 4.0.
-     </pre>
-
-3. **Unified attribution suggestion (for both code and docs):**
-     <pre>
-     HelloAGENTS — © 2025 <a href="https://github.com/hellowind777/helloagents">Hellowind</a>. Code: Apache-2.0; Docs: CC BY 4.0.
-     </pre>
-
----
-
-## 🙏 Acknowledgments
-
-**Inspired by:**
-- [Claude Code](https://github.com/anthropics/claude-code) by Anthropic — One target assistant this tool audits
-- [Codex CLI](https://github.com/openai/codex) by OpenAI — One target assistant this tool audits (and AGENTS.md format reference)
-- [Gemini CLI](https://github.com/google-gemini/gemini-cli) by Google — GEMINI.md format reference
-
-**Community:**
-- All contributors who submitted PRs
-- Early adopters who provided feedback
-- You, for reading this far! 🎉
-
----
-
-## 📞 Support & Community
-
-- 📖 **Documentation**: You're reading it!
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/hellowind777/hello-auditkit/discussions)
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/hellowind777/hello-auditkit/issues)
-- 💡 **Feature Requests**: [GitHub Issues](https://github.com/hellowind777/hello-auditkit/issues)
+> Note: this skill may fetch external documents (e.g., the latest prompting guide) during runtime. Those materials remain subject to their original licenses.
 
 ---
 
 <div align="center">
-
-**Made with ❤️ by [Hellowind](https://github.com/hellowind777)**
-
-[⬆ Back to Top](#hello-auditkit)
-
+  <img src="./readme_images/05-screenshot.png" alt="Example" width="720">
 </div>

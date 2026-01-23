@@ -1,355 +1,490 @@
-# Design Coherence Audit Rules
+# 设计一致性审计规则
 
-> **Applies to**: Multi-file systems (Skills, Plugins, Composite Systems)
-> **Execution Required**: Execute FULL directory scan. Extract ALL rules from ALL files. Detect conflicts and red flags.
+> **适用于**：多文件系统（技能、插件、复合系统）
+> **执行要求**：执行完整目录扫描。从所有文件中提取所有规则。检测冲突和红旗。
 
-## Table of Contents
+## 目录
 
-- [Overview](#overview)
-- [Full Directory Scanning](#full-directory-scanning)
-- [Design Philosophy Extraction](#design-philosophy-extraction)
-- [Rule Inventory](#rule-inventory)
-- [Cross-File Coherence](#cross-file-coherence)
-- [Conflict Detection](#conflict-detection)
-- [Framework Assessment](#framework-assessment)
-- [Output Format](#output-format)
-
----
-
-## Overview
-
-**Design Coherence Audit** analyzes the entire directory structure to:
-
-1. **Extract** all design intents, rules, and specifications
-2. **Verify** consistency across all files
-3. **Detect** conflicts and contradictions
-4. **Assess** overall framework quality
+- [概述](#概述)
+- [完整目录扫描](#完整目录扫描)
+- [设计理念提取](#设计理念提取)
+- [规则清单](#规则清单)
+- [跨文件一致性](#跨文件一致性)
+- [同类文件一致性](#同类文件一致性)
+- [冲突检测](#冲突检测)
+- [框架评估](#框架评估)
+- [输出格式](#输出格式)
 
 ---
 
-## Full Directory Scanning
+## 概述
 
-### Step 0: Complete Enumeration
+**设计一致性审计**分析整个目录结构以：
 
-**CRITICAL: Scan ALL files, not just entry points.**
+1. **提取**所有设计意图、规则和规范
+2. **验证**所有文件的一致性
+3. **检测**冲突和矛盾
+4. **评估**整体框架质量
 
-Recursively enumerate, classify, read, and build complete rule inventory.
+---
 
-### File Classification
+## 完整目录扫描
 
-| Type | Role | What to Extract |
-|------|------|-----------------|
-| `SKILL.md` | Primary | Purpose, principles, rules |
-| `AGENTS.md`/`CLAUDE.md`/`GEMINI.md` | Memory | Global rules, conventions |
-| `plugin.json` | Manifest | Declared capabilities |
-| `references/*.md` | Supporting | Detailed rules, specs |
-| `commands/*.md` | Commands | Per-command rules |
-| `agents/*.md` | Agents | Per-agent rules |
-| `*.py`, `*.sh` | Scripts | Implemented behaviors |
-| `*.json`, `*.yaml` | Configs | Configuration constraints |
+### 步骤 0：完整枚举
 
-### Scan Output
+**关键：扫描所有文件，不仅仅是入口点。**
+
+递归枚举、分类、读取，并构建完整的规则清单。
+
+### 文件分类
+
+| 类型 | 角色 | 提取内容 |
+|------|------|----------|
+| `SKILL.md` | 主要 | 目的、原则、规则 |
+| `AGENTS.md`/`CLAUDE.md`/`GEMINI.md` | 记忆 | 全局规则、约定 |
+| `plugin.json` | 清单 | 声明的能力 |
+| `references/*.md` | 支持 | 详细规则、规范 |
+| `commands/*.md` | 命令 | 每个命令的规则 |
+| `agents/*.md` | 代理 | 每个代理的规则 |
+| `*.py`, `*.sh` | 脚本 | 实现的行为 |
+| `*.json`, `*.yaml` | 配置 | 配置约束 |
+
+### 扫描输出
 
 ```markdown
-## Directory Scan
+## 目录扫描
 
-| File | Type | Rules | Constraints |
-|------|------|-------|-------------|
-| SKILL.md | Primary | 12 | 8 |
-| references/spec.md | Reference | 25 | 15 |
+| 文件 | 类型 | 规则数 | 约束数 |
+|------|------|--------|--------|
+| SKILL.md | 主要 | 12 | 8 |
+| references/spec.md | 参考 | 25 | 15 |
 | ... | ... | ... | ... |
 
-**Total**: N files, M rules, K constraints
+**总计**：N 个文件，M 条规则，K 个约束
 ```
 
 ---
 
-## Design Philosophy Extraction
+## 设计理念提取
 
-### Per-File Extraction
+### 每文件提取
 
-| Element | Source Patterns | Priority |
-|---------|-----------------|----------|
-| Primary purpose | description, Overview | Highest |
-| Core principles | "Principle:", numbered lists | High |
-| Explicit constraints | MUST, MUST NOT, ALWAYS, NEVER | High |
-| Implicit values | Repeated patterns, emphasis | Medium |
-| Assumptions | "assumes", "expects" | Medium |
+| 元素 | 来源模式 | 优先级 |
+|------|----------|--------|
+| 主要目的 | description、Overview | 最高 |
+| 核心原则 | "原则："、编号列表 | 高 |
+| 显式约束 | MUST、MUST NOT、ALWAYS、NEVER | 高 |
+| 隐式价值 | 重复模式、强调 | 中 |
+| 假设 | "假设"、"期望" | 中 |
 
-### Aggregation
+### 聚合
 
 ```markdown
-## Aggregated Design Philosophy
+## 聚合的设计理念
 
-### From Primary Files
-- Purpose: [Synthesized]
-- Principles: [List]
+### 来自主要文件
+- 目的：[综合]
+- 原则：[列表]
 
-### From References
-- Additional principles: [List]
-- Detailed constraints: [List]
+### 来自参考文件
+- 附加原则：[列表]
+- 详细约束：[列表]
 
-### Synthesized Core Philosophy
-1. [Principle 1] - appears in N files
-2. [Principle 2] - appears in M files
+### 综合核心理念
+1. [原则 1] - 出现在 N 个文件中
+2. [原则 2] - 出现在 M 个文件中
 ```
 
-### Consistency Check
+### 一致性检查
 
-| Check | Question | Severity |
-|-------|----------|----------|
-| Purpose alignment | All files serve stated purpose? | Severe |
-| Principle coverage | Principles mentioned consistently? | Warning |
-| Constraint consistency | Same constraints in relevant files? | Warning |
-| Value alignment | Shared implicit values? | Info |
+| 检查 | 问题 | 严重性 |
+|------|------|--------|
+| 目的对齐 | 所有文件服务于声明的目的？ | Severe |
+| 原则覆盖 | 原则一致提及？ | Warning |
+| 约束一致性 | 相关文件中相同约束？ | Warning |
+| 价值对齐 | 共享隐式价值？ | Info |
 
 ---
 
-## Rule Inventory
+## 规则清单
 
-### Complete Extraction
+### 完整提取
 
-**Extract ALL rules from ALL files.**
+**从所有文件中提取所有规则。**
 
-### Rule Categories
+### 规则类别
 
-| Category | Examples | Source Patterns |
-|----------|----------|-----------------|
-| **Behavioral** | "When X, do Y" | Conditionals |
-| **Constraint** | "MUST/MUST NOT" | Modal verbs |
-| **Format** | "Output must be JSON" | Format specs |
-| **Process** | "First X, then Y" | Sequential |
-| **Validation** | "Check that X" | Validation |
-| **Exception** | "Unless X, then Y" | Exception clauses |
+| 类别 | 示例 | 来源模式 |
+|------|------|----------|
+| **行为型** | "当 X 时，执行 Y" | 条件句 |
+| **约束型** | "MUST/MUST NOT" | 情态动词 |
+| **格式型** | "输出必须是 JSON" | 格式规范 |
+| **流程型** | "先 X，然后 Y" | 顺序 |
+| **验证型** | "检查 X" | 验证 |
+| **例外型** | "除非 X，否则 Y" | 例外子句 |
 
-### Inventory Format
-
-```markdown
-## Rule Inventory
-
-### Behavioral Rules (N total)
-| ID | Rule | Source | Line |
-|----|------|--------|------|
-| R1 | "When user asks X..." | SKILL.md | 45 |
-
-### Constraint Rules (N total)
-| ID | Constraint | Type | Source |
-|----|------------|------|--------|
-| C1 | "MUST validate" | MUST | SKILL.md:67 |
-```
-
----
-
-## Cross-File Coherence
-
-### Rule Propagation Check
-
-```
-For each rule R from file F:
-  1. Identify files where R should apply
-  2. Check if R mentioned/followed in those files
-  3. Check for contradictions
-  4. Report gaps and conflicts
-```
-
-### Propagation Matrix
+### 清单格式
 
 ```markdown
-## Rule Propagation
+## 规则清单
 
-| Rule | Origin | Should Apply | Applied In | Gap |
-|------|--------|--------------|------------|-----|
-| "Validate input" | SKILL.md | All cmds | cmd1, cmd2 | cmd3 ❌ |
-| "JSON output" | SKILL.md | All | All | ✅ |
-```
+### 行为规则（共 N 条）
+| ID | 规则 | 来源 | 行号 |
+|----|------|------|------|
+| R1 | "当用户询问 X..." | SKILL.md | 45 |
 
-### Cross-Reference Verification
-
-| Check | Description | Severity |
-|-------|-------------|----------|
-| Rule in docs, not in code | Mentioned but not implemented | Warning |
-| Rule in code, not in docs | Implemented but undocumented | Info |
-| Conflicting rules | File A says X, File B says NOT X | Severe |
-| Rule scope mismatch | Global rule not applied locally | Warning |
-
-### Constraint Inheritance
-
-```markdown
-## Constraint Inheritance
-
-| Global Constraint | Local Files | Status |
-|-------------------|-------------|--------|
-| "MUST use kebab-case" | commands/*.md | ✅ All compliant |
-| "NEVER hardcode paths" | scripts/*.py | ⚠️ script2.py violates |
-```
-
-### Structural Redundancy Detection
-
-| Check | Description | Severity |
-|-------|-------------|----------|
-| Repeated sections | Same section structure in multiple files → centralize | Warning |
-| Duplicate tables | Identical tables → move to shared reference | Warning |
-| Parallel content | Same info in different formats → keep one | Warning |
-
----
-
-## Conflict Detection
-
-### Conflict Categories
-
-#### Category A: Same-File Contradictions
-
-```markdown
-File: SKILL.md
-  Line 45: "MUST include detailed error messages"
-  Line 123: "MUST NOT expose error details"
-Conflict: Direct contradiction
-Severity: Severe
-```
-
-#### Category B: Cross-File Contradictions
-
-```markdown
-File A (SKILL.md:45): "Output MUST be JSON"
-File B (cmd/run.md:23): "Output as plain text"
-Conflict: Command contradicts skill rule
-Severity: Severe
-```
-
-#### Category C: Principle-Rule Conflicts
-
-```markdown
-Principle (SKILL.md): "Keep it simple"
-Rule (spec.md:89): "Include full audit trail in every response"
-Conflict: Rule contradicts principle
-Severity: Warning
-```
-
-#### Category D: Implicit-Explicit Conflicts
-
-```markdown
-Implicit (description): "Fast, lightweight"
-Explicit (spec.md): "Run 30+ validation checks"
-Conflict: Explicit contradicts implicit
-Severity: Warning
-```
-
-### Detection Algorithm
-
-For each rule pair: check domain overlap → verify logical/constraint/value consistency → flag conflicts with locations.
-
----
-
-## Framework Assessment
-
-### Structural Design
-
-| Check | Question | If Failed |
-|-------|----------|-----------|
-| Separation of concerns | Responsibilities separated? | Suggest splitting |
-| Single responsibility | Each file has one purpose? | Suggest refactoring |
-| Appropriate abstraction | Right level? | Suggest changes |
-| Modularity | Independent components? | Suggest decoupling |
-
-### Red Flags
-
-| Red Flag | Indicator | Severity | Suggestion |
-|----------|-----------|----------|------------|
-| God file | SKILL.md >625 lines, multiple concerns | Warning | Split by responsibility |
-| Scattered rules | Same rule in >3 files | Warning | Centralize |
-| Orphan components | Files not referenced | Info | Remove or integrate |
-| Circular deps | A→B→C→A | Severe | Break cycle |
-| Implicit contracts | Undocumented assumptions | Warning | Document explicitly |
-| Missing error handling | No error rules | Warning | Add error section |
-
-### Industry Patterns
-
-| Pattern | When to Suggest |
-|---------|-----------------|
-| Layered architecture | Mixed concerns detected |
-| Convention over config | Too much required config |
-| Composition over inheritance | Monolithic components |
-| Explicit over implicit | Hidden assumptions |
-| Progressive disclosure | Information overload |
-
----
-
-## Output Format
-
-### Design Coherence Section
-
-```markdown
-## Design Coherence Analysis
-
-### Directory Scan Summary
-| Metric | Value |
-|--------|-------|
-| Files scanned | N |
-| Rules extracted | M |
-| Constraints found | K |
-
-### Aggregated Philosophy
-**Purpose**: [Synthesized]
-**Principles** (by frequency):
-1. [P1] - N files
-2. [P2] - M files
-
-### Cross-File Coherence
-
-#### Rule Propagation
-| Status | Count |
-|--------|-------|
-| ✅ Fully propagated | N |
-| ⚠️ Partial gaps | M |
-| ❌ Major gaps | K |
-
-#### Conflicts Detected
-| Type | Count | Severity |
-|------|-------|----------|
-| Direct contradictions | N | Severe |
-| Cross-file conflicts | M | Severe |
-| Principle-rule conflicts | K | Warning |
-
-### Framework Assessment
-**Quality**: [Good/Acceptable/Needs Improvement]
-
-| Aspect | Status |
-|--------|--------|
-| Separation of concerns | ✅/⚠️/❌ |
-| Single responsibility | ✅/⚠️/❌ |
-| Modularity | ✅/⚠️/❌ |
-
-### Red Flags
-| Flag | Location | Severity |
-|------|----------|----------|
-| [Flag] | [File] | [Level] |
-
-### Recommendations
-1. **Priority 1**: [Most critical]
-2. **Priority 2**: [Second]
+### 约束规则（共 N 条）
+| ID | 约束 | 类型 | 来源 |
+|----|------|------|------|
+| C1 | "MUST 验证" | MUST | SKILL.md:67 |
 ```
 
 ---
 
-## Severity Guidelines
+## 跨文件一致性
 
-| Issue | Severity |
-|-------|----------|
-| Cross-file rule contradiction | Severe |
-| Core principle violated | Severe |
-| Rule not propagated | Warning |
-| Framework red flag | Warning |
-| Implicit-explicit conflict | Warning |
-| Missing documentation | Info |
-| Suboptimal pattern | Info |
+### 规则传播检查
+
+```
+对于来自文件 F 的每条规则 R：
+  1. 识别 R 应该应用的文件
+  2. 检查 R 是否在这些文件中被提及/遵循
+  3. 检查矛盾
+  4. 报告差距和冲突
+```
+
+### 传播矩阵
+
+```markdown
+## 规则传播
+
+| 规则 | 来源 | 应适用 | 应用于 | 差距 |
+|------|------|--------|--------|------|
+| "验证输入" | SKILL.md | 所有命令 | cmd1, cmd2 | cmd3 ❌ |
+| "JSON 输出" | SKILL.md | 所有 | 所有 | ✅ |
+```
+
+### 交叉引用验证
+
+| 检查 | 描述 | 严重性 |
+|------|------|--------|
+| 规则在文档中但不在代码中 | 提及但未实现 | Warning |
+| 规则在代码中但不在文档中 | 实现但无文档 | Info |
+| 冲突规则 | 文件 A 说 X，文件 B 说 NOT X | Severe |
+| 规则范围不匹配 | 全局规则未在本地应用 | Warning |
+
+### 约束继承
+
+```markdown
+## 约束继承
+
+| 全局约束 | 本地文件 | 状态 |
+|----------|----------|------|
+| "MUST 使用 kebab-case" | commands/*.md | ✅ 全部合规 |
+| "NEVER 硬编码路径" | scripts/*.py | ⚠️ script2.py 违反 |
+```
+
+### 结构冗余检测
+
+| 检查 | 描述 | 严重性 |
+|------|------|--------|
+| 重复章节 | 多个文件中相同章节结构 → 集中 | Warning |
+| 重复表格 | 相同表格 → 移到共享参考 | Warning |
+| 并行内容 | 不同格式的相同信息 → 保留一个 | Warning |
 
 ---
 
-## Should NOT Flag
+## 同类文件一致性
 
-- Different detail levels (summary vs detailed)
-- Scoped rule overrides with justification
-- Progressive disclosure patterns
-- Platform-specific variations (documented)
-- Intentional design choices (with rationale)
-- Minor style variations
+> **目的**：确保同一类别的文件遵循一致的结构、格式和顺序。
+> **适用于**：有分类文件的多文件系统（type-*.md、cross-*.md、rules-*.md 等）
+
+### 文件类型分类
+
+| 类别 | 模式 | 期望一致性 |
+|------|------|------------|
+| 类型定义 | `type-*.md` | 章节结构、检查表、严重性格式 |
+| 横切规则 | `cross-*.md` | 目录格式、章节顺序、输出格式 |
+| 通用规则 | `rules-*.md` | 检查类别、表格格式、示例 |
+| 参考材料 | `ref-*.md` | 标题格式、导航、内容深度 |
+| 命令 | `commands/*.md` | Frontmatter 字段、正文结构 |
+| 代理 | `agents/*.md` | Frontmatter 字段、能力描述 |
+
+### 结构一致性检查
+
+| 检查 | 比较内容 | 严重性 |
+|------|----------|--------|
+| 目录格式 | 相同深度、相同样式（要点 vs 编号）| Warning |
+| 章节顺序 | 核心章节以相同顺序出现 | Warning |
+| 标题层次 | 相同 H1→H2→H3 模式 | Warning |
+| 表格格式 | 同目的表格相同列 | Warning |
+| 代码块样式 | 相同围栏样式、相同语言标签 | Info |
+
+### 格式一致性检查
+
+| 检查 | 比较内容 | 严重性 |
+|------|----------|--------|
+| Frontmatter 结构 | 相同必需字段、相同字段顺序 | Warning |
+| 表格列名 | 等效表格相同标题 | Warning |
+| 严重性指示符 | 相同图标（🔴/🟡/🟢）或文本（Severe/Warning/Info）| Warning |
+| 状态指示符 | 相同样式（✅/⚠️/❌ vs Pass/Warn/Fail）| Info |
+| 引用样式 | 相同链接格式、相同锚点约定 | Warning |
+
+### 顺序一致性检查
+
+| 检查 | 比较内容 | 严重性 |
+|------|----------|--------|
+| 章节顺序 | 前提在依赖之前 | Warning |
+| 表格行顺序 | 严重性高→低，或按字母顺序 | Info |
+| 列表项顺序 | 优先级顺序或逻辑顺序 | Info |
+| 检查类别顺序 | 所有文件相同类别顺序 | Warning |
+
+### 比较矩阵
+
+<same_type_consistency_analysis>
+对于每个文件类型类别，比较该类别内的所有文件：
+1. 提取结构骨架（标题、章节、主要元素）
+2. 比较同类别文件的骨架
+3. 识别与多数模式的偏差
+4. 评估偏差是否由内容性质合理化
+5. 标记不合理的不一致
+</same_type_consistency_analysis>
+
+```markdown
+## 同类一致性检查
+
+### 类别：type-*.md（N 个文件）
+
+| 文件 | 目录 | 章节 | 表格 | 偏差 | 合理 |
+|------|------|------|------|------|------|
+| type-prompt.md | ✅ | ✅ | ✅ | 无 | - |
+| type-memory.md | ✅ | ✅ | ⚠️ | 缺少"尺寸"表 | ❌ |
+| type-skill.md | ✅ | ⚠️ | ✅ | 额外"脚本"章节 | ✅（内容特定）|
+```
+
+### 允许的不一致
+
+| 偏差类型 | 何时允许 | 示例 |
+|----------|----------|------|
+| 额外章节 | 内容特定需求 | type-skill.md 有"脚本"章节 |
+| 缺少章节 | 章节不适用 | type-prompt.md 无"目录"章节 |
+| 不同表格列 | 跟踪不同数据 | ref-*.md vs type-*.md 表格 |
+| 不同深度 | 内容复杂度不同 | 简单 vs 复杂主题 |
+| 不同示例 | 领域特定说明 | 平台特定示例 |
+
+### 应标记
+
+| 模式 | 描述 | 严重性 |
+|------|------|--------|
+| 目录样式不一致 | 有的用要点，有的用编号 | Warning |
+| 缺少标准章节 | 无理由缺少必需章节 | Warning |
+| 表格列不匹配 | 同目的表格不同列 | Warning |
+| 严重性格式混合 | 一个文件用 🔴，另一个用"Severe"文本 | Warning |
+| 顺序不一致 | 一个文件 A 在 B 前，另一个 B 在 A 前 | Warning |
+| 标题层级跳跃 | 一个文件 H1→H3，其他 H1→H2→H3 | Warning |
+
+### 不应标记
+
+| 模式 | 原因 |
+|------|------|
+| 内容合理化的额外章节 | 该内容类型必需 |
+| 按复杂度变化的深度 | 更复杂主题需要更多深度 |
+| 平台特定示例 | 不同平台需要不同示例 |
+| 可选章节存在/缺失 | 可选内容按需变化 |
+| 轻微格式差异 | 空格、空行等 |
+
+### 输出格式
+
+```markdown
+### 同类文件一致性
+
+| 类别 | 文件数 | 一致 | 偏差 | 合理 |
+|------|--------|------|------|------|
+| type-*.md | 4 | 3 | 1 | 0 |
+| cross-*.md | 3 | 3 | 0 | - |
+| rules-*.md | 3 | 2 | 1 | 1 |
+
+**不合理的偏差**：
+| 文件 | 类别 | 偏差 | 建议 |
+|------|------|------|------|
+| type-memory.md | type-*.md | 缺少"尺寸阈值"章节 | 添加章节以保持一致 |
+```
+
+---
+
+## 冲突检测
+
+### 冲突类别
+
+<conflict_detection_comparison>
+冲突检测需要跨维度的比较分析：
+- 同文件：同一文件内的规则是否相互矛盾？
+- 跨文件：不同文件中的规则是否相互冲突？
+- 原则-规则：具体规则是否违反声明的原则？
+- 隐式-显式：显式规则是否与隐式设计意图冲突？
+</conflict_detection_comparison>
+
+#### 类别 A：同文件矛盾
+
+```markdown
+文件：SKILL.md
+  第 45 行："MUST 包含详细错误消息"
+  第 123 行："MUST NOT 暴露错误详情"
+冲突：直接矛盾
+严重性：Severe
+```
+
+#### 类别 B：跨文件矛盾
+
+```markdown
+文件 A (SKILL.md:45)："输出 MUST 是 JSON"
+文件 B (cmd/run.md:23)："输出为纯文本"
+冲突：命令与技能规则矛盾
+严重性：Severe
+```
+
+#### 类别 C：原则-规则冲突
+
+```markdown
+原则 (SKILL.md)："保持简单"
+规则 (spec.md:89)："每个响应包含完整审计追踪"
+冲突：规则与原则矛盾
+严重性：Warning
+```
+
+#### 类别 D：隐式-显式冲突
+
+```markdown
+隐式 (description)："快速、轻量"
+显式 (spec.md)："运行 30+ 项验证检查"
+冲突：显式与隐式矛盾
+严重性：Warning
+```
+
+### 检测算法
+
+对于每对规则：检查领域重叠 → 验证逻辑/约束/值一致性 → 标记冲突及位置。
+
+---
+
+## 框架评估
+
+### 结构设计
+
+<framework_quality_analysis>
+框架评估需要从多个角度进行深度分析：
+- 关注点分离：组件职责是否清晰分离？
+- 单一职责：每个文件是否只有一个目的？
+- 抽象层级：抽象级别是否适当？
+- 模块化：组件是否可以独立运行？
+</framework_quality_analysis>
+
+| 检查 | 问题 | 如果失败 |
+|------|------|----------|
+| 关注点分离 | 职责分离了吗？ | 建议拆分 |
+| 单一职责 | 每个文件只有一个目的？ | 建议重构 |
+| 适当抽象 | 级别正确吗？ | 建议调整 |
+| 模块化 | 组件独立吗？ | 建议解耦 |
+
+### 红旗
+
+| 红旗 | 指标 | 严重性 | 建议 |
+|------|------|--------|------|
+| 上帝文件 | SKILL.md >625 行，多个关注点 | Warning | 按职责拆分 |
+| 分散规则 | 同一规则在 >3 个文件中 | Warning | 集中 |
+| 孤立组件 | 文件未被引用 | Info | 删除或集成 |
+| 循环依赖 | A→B→C→A | Severe | 打破循环 |
+| 隐式契约 | 未文档化的假设 | Warning | 显式文档化 |
+| 缺少错误处理 | 无错误规则 | Warning | 添加错误章节 |
+
+### 行业模式
+
+| 模式 | 何时建议 |
+|------|----------|
+| 分层架构 | 检测到混合关注点 |
+| 约定优于配置 | 所需配置过多 |
+| 组合优于继承 | 单体组件 |
+| 显式优于隐式 | 隐藏假设 |
+| 渐进披露 | 信息过载 |
+
+---
+
+## 输出格式
+
+### 设计一致性章节
+
+```markdown
+## 设计一致性分析
+
+### 目录扫描摘要
+| 指标 | 值 |
+|------|-----|
+| 扫描文件数 | N |
+| 提取规则数 | M |
+| 发现约束数 | K |
+
+### 聚合理念
+**目的**：[综合]
+**原则**（按频率）：
+1. [P1] - N 个文件
+2. [P2] - M 个文件
+
+### 跨文件一致性
+
+#### 规则传播
+| 状态 | 数量 |
+|------|------|
+| ✅ 完全传播 | N |
+| ⚠️ 部分差距 | M |
+| ❌ 重大差距 | K |
+
+#### 检测到的冲突
+| 类型 | 数量 | 严重性 |
+|------|------|--------|
+| 直接矛盾 | N | Severe |
+| 跨文件冲突 | M | Severe |
+| 原则-规则冲突 | K | Warning |
+
+### 框架评估
+**质量**：[良好/可接受/需改进]
+
+| 方面 | 状态 |
+|------|------|
+| 关注点分离 | ✅/⚠️/❌ |
+| 单一职责 | ✅/⚠️/❌ |
+| 模块化 | ✅/⚠️/❌ |
+
+### 红旗
+| 红旗 | 位置 | 严重性 |
+|------|------|--------|
+| [红旗] | [文件] | [级别] |
+
+### 建议
+1. **优先级 1**：[最关键]
+2. **优先级 2**：[第二]
+```
+
+---
+
+## 严重性指南
+
+| 问题 | 严重性 |
+|------|--------|
+| 跨文件规则矛盾 | Severe |
+| 核心原则违反 | Severe |
+| 规则未传播 | Warning |
+| 框架红旗 | Warning |
+| 隐式-显式冲突 | Warning |
+| 缺少文档 | Info |
+| 次优模式 | Info |
+
+---
+
+## 不应标记
+
+- 不同的详细程度（摘要 vs 详细）
+- 有理由的范围规则覆盖
+- 渐进披露模式
+- 平台特定变化（有文档）
+- 有意的设计选择（有理由）
+- 轻微风格变化

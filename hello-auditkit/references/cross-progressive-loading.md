@@ -1,369 +1,377 @@
-# Progressive Loading Audit Rules
+# 渐进加载审计规则
 
-> **Applies to**: Skills, Plugins, Composite Systems
-> **Execution Required**: Audit content placement at each level (L1-L4). Check for anti-patterns. Verify "when to read" guidance.
+> **适用于**：技能、插件、复合系统
+> **执行要求**：审计每个层级（L1-L4）的内容放置。检查反模式。验证"何时读取"指导。
 
-## Table of Contents
+## 目录
 
-- [Overview](#overview)
-- [Loading Level Model](#loading-level-model)
-- [Content Placement Audit](#content-placement-audit)
-- [Progressive Disclosure](#progressive-disclosure)
-- [Reference File Audit](#reference-file-audit)
-- [Anti-Patterns](#anti-patterns)
-- [Output Format](#output-format)
-
----
-
-## Overview
-
-### Two Related Concepts
-
-| Concept | Definition | Goal |
-|---------|------------|------|
-| **Progressive Loading** | Content loaded in stages | Minimize context usage |
-| **Progressive Disclosure** | Info revealed gradually | Reduce cognitive load |
+- [概述](#概述)
+- [加载层级模型](#加载层级模型)
+- [内容放置审计](#内容放置审计)
+- [渐进披露](#渐进披露)
+- [参考文件审计](#参考文件审计)
+- [反模式](#反模式)
+- [输出格式](#输出格式)
 
 ---
 
-## Loading Level Model
+## 概述
 
-### Standard Levels
+### 两个相关概念
 
-| Level | Content | Load Timing | Cost | Limit |
-|-------|---------|-------------|------|-------|
-| **L1** | Metadata | Always | Permanent | ~100 words |
-| **L2** | Main body | When triggered | Session | <500 lines |
-| **L3** | References | On demand | Temporary | **No official limit** |
-| **L4** | Scripts | Runtime only | Zero | No limit |
-
-### L1: Metadata (Always Loaded)
-
-**Content that MUST be in L1:**
-- Unique identifier (name)
-- Trigger conditions (description)
-- Essential routing keywords
-
-**Content that MUST NOT be in L1:**
-- Implementation details
-- Full instructions
-- Examples >1 sentence
-
-### L2: Main Body (Trigger-Loaded)
-
-**Content that belongs:**
-- Core instructions and workflows
-- Common case handling
-- Primary output format
-- Brief inline examples
-
-**Content to move to L3:**
-- Detailed tables (>20 rows)
-- Extended examples (>10 lines)
-- Domain-specific docs
-- Edge case details
-- Historical context
-
-### L3: References (On-Demand)
-
-**Content that belongs:**
-- Detailed specifications
-- Comprehensive examples
-- Domain knowledge
-- API documentation
-- Lookup tables
-
-**Content that should NOT be here:**
-- Core workflow (needed every time)
-- Critical constraints
-- Primary output format
-
-### L4: Scripts (Runtime-Only)
-
-- Never loaded into AI context
-- Executed at runtime
-- **No size limits**
+| 概念 | 定义 | 目标 |
+|------|------|------|
+| **渐进加载** | 分阶段加载内容 | 最小化上下文使用 |
+| **渐进披露** | 逐步揭示信息 | 减少认知负荷 |
 
 ---
 
-## Content Placement Audit
+## 加载层级模型
 
-### Step 1: Inventory by Level
+### 标准层级
+
+| 层级 | 内容 | 加载时机 | 成本 | 限制 |
+|------|------|----------|------|------|
+| **L1** | 元数据 | 始终 | 永久 | ~100 词 |
+| **L2** | 主正文 | 触发时 | 会话 | <500 行 |
+| **L3** | 参考文件 | 按需 | 临时 | **无官方限制** |
+| **L4** | 脚本 | 仅运行时 | 零 | 无限制 |
+
+### L1：元数据（始终加载）
+
+**必须在 L1 的内容：**
+- 唯一标识符（name）
+- 触发条件（description）
+- 基本路由关键词
+
+**不应在 L1 的内容：**
+- 实现细节
+- 完整指令
+- >1 句的示例
+
+### L2：主正文（触发加载）
+
+**应包含的内容：**
+- 核心指令和工作流
+- 常见情况处理
+- 主要输出格式
+- 简短内联示例
+
+**应移到 L3 的内容：**
+- 详细表格（>20 行）
+- 扩展示例（>10 行）
+- 领域特定文档
+- 边缘情况详情
+- 历史背景
+
+### L3：参考文件（按需）
+
+**应包含的内容：**
+- 详细规范
+- 全面示例
+- 领域知识
+- API 文档
+- 查询表
+
+**不应在此的内容：**
+- 核心工作流（每次都需要）
+- 关键约束
+- 主要输出格式
+
+### L4：脚本（仅运行时）
+
+- 从不加载到 AI 上下文
+- 运行时执行
+- **无尺寸限制**
+
+---
+
+## 内容放置审计
+
+### 步骤 1：按层级清点
 
 ```markdown
-## Content Level Inventory
+## 内容层级清点
 
-| Level | Location | Content | Lines |
-|-------|----------|---------|-------|
+| 层级 | 位置 | 内容 | 行数 |
+|------|------|------|------|
 | L1 | frontmatter | name, desc | X |
-| L2 | SKILL.md body | [sections] | Y |
-| L3 | references/*.md | [files] | Z |
-| L4 | scripts/*.py | [scripts] | W |
+| L2 | SKILL.md 正文 | [章节] | Y |
+| L3 | references/*.md | [文件] | Z |
+| L4 | scripts/*.py | [脚本] | W |
 ```
 
-### Step 2: Identify Misplacement
+### 步骤 2：识别放置错误
 
-#### L1 Bloat Detection
+<content_placement_analysis>
+内容放置判断需要分析：
+- L1 膨胀：description 是否 >500 字符？是否包含工作流/代码？
+- L2 过载：正文是否 >500 行？是否有可分离的大表格/示例？
+- L3 误用：核心工作流是否在 L3？是否缺少"何时读取"指导？
+- 关键问题：此内容是每次都需要还是按需加载？
+</content_placement_analysis>
 
-| Issue | Detection | Severity |
-|-------|-----------|----------|
-| Description >500 chars | Character count | Warning |
-| Implementation in description | Contains workflow | Warning |
-| Examples in description | Code blocks | Warning |
-| Redundant keywords | Repeated concepts | Info |
+#### L1 膨胀检测
 
-#### L2 Overload Detection
+| 问题 | 检测 | 严重性 |
+|------|------|--------|
+| Description >500 字符 | 字符计数 | Warning |
+| Description 含实现 | 包含工作流 | Warning |
+| Description 含示例 | 代码块 | Warning |
+| 冗余关键词 | 重复概念 | Info |
 
-| Issue | Detection | Severity |
-|-------|-----------|----------|
-| Body >500 lines | Line count | Warning (>625: Severe) |
-| Large inline tables | >20 rows | Warning |
-| Extended examples | >10 lines each | Info |
-| Edge-case-only content | Conditional use | Warning |
-| Duplicated from L3 | Same content | Warning |
+#### L2 过载检测
 
-#### L3 Misuse Detection
+| 问题 | 检测 | 严重性 |
+|------|------|--------|
+| 正文 >500 行 | 行计数 | Warning（>625：Severe）|
+| 大型内联表格 | >20 行 | Warning |
+| 扩展示例 | 每个 >10 行 | Info |
+| 仅边缘情况内容 | 条件使用 | Warning |
+| 与 L3 重复 | 相同内容 | Warning |
 
-| Issue | Detection | Severity |
-|-------|-----------|----------|
-| Core workflow in L3 | Should be L2 | Severe |
-| No "when to read" | Missing guidance | Warning |
-| Reference never needed | No use case | Info |
-| Reference always needed | Should be L2 | Warning |
+#### L3 误用检测
 
-### Step 3: Calculate Efficiency
+| 问题 | 检测 | 严重性 |
+|------|------|--------|
+| 核心工作流在 L3 | 应在 L2 | Severe |
+| 无"何时读取" | 缺少指导 | Warning |
+| 参考从不需要 | 无使用场景 | Info |
+| 参考始终需要 | 应在 L2 | Warning |
+
+### 步骤 3：计算效率
 
 ```markdown
-## Loading Efficiency
+## 加载效率
 
-| Metric | Value | Target | Status |
-|--------|-------|--------|--------|
-| L1 size | X words | ≤100 | ✅/⚠️/❌ |
-| L2 size | Y lines | ≤500 | ✅/⚠️/❌ |
-| L3 size | Z lines | Evaluate by content | ✅/⚠️ |
-| "Always needed" in L3 | N files | 0 | ⚠️ if >0 |
+| 指标 | 值 | 目标 | 状态 |
+|------|-----|------|------|
+| L1 尺寸 | X 词 | ≤100 | ✅/⚠️/❌ |
+| L2 尺寸 | Y 行 | ≤500 | ✅/⚠️/❌ |
+| L3 尺寸 | Z 行 | 按内容评估 | ✅/⚠️ |
+| L3 中"始终需要"| N 个文件 | 0 | ⚠️ 如 >0 |
 ```
 
 ---
 
-## Progressive Disclosure
+## 渐进披露
 
-### Disclosure Layers
+### 披露层次
 
-| Layer | What User Sees | When |
-|-------|----------------|------|
-| **Surface** | Basic usage | First interaction |
-| **Standard** | Full features | Regular use |
-| **Advanced** | Edge cases, config | Expert use |
+| 层次 | 用户看到什么 | 何时 |
+|------|--------------|------|
+| **表面** | 基本用法 | 首次交互 |
+| **标准** | 完整功能 | 常规使用 |
+| **高级** | 边缘情况、配置 | 专家使用 |
 
-### Surface Layer Checks
+### 表面层检查
 
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Simple usage works | Sensible defaults | Severe |
-| Basic example provided | Early in content | Warning |
-| No mandatory complex setup | Can start immediately | Warning |
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 简单用法有效 | 合理默认值 | Severe |
+| 提供基本示例 | 内容早期 | Warning |
+| 无强制复杂设置 | 可立即开始 | Warning |
 
-### Standard Layer Checks
+### 标准层检查
 
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Options documented | All configurable behaviors | Warning |
-| Options have defaults | No mandatory decisions | Info |
-| Common workflows covered | 80% use cases in body | Warning |
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 选项有文档 | 所有可配置行为 | Warning |
+| 选项有默认值 | 无强制决策 | Info |
+| 覆盖常见工作流 | 80% 用例在正文中 | Warning |
 
-### Advanced Layer Checks
+### 高级层检查
 
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Advanced separated | In references or marked | Info |
-| Expert options documented | For customization | Info |
-| Edge cases in references | Not cluttering main | Info |
-
----
-
-## Reference File Audit
-
-### "When to Read" Requirements
-
-Every reference MUST have loading guidance in SKILL.md:
-
-**Good:**
-```markdown
-## Reference Files
-
-Read `references/api-spec.md` when:
-- User asks about API endpoints
-- Generating API code
-- Debugging API errors
-```
-
-**Bad:**
-```markdown
-See references/ for more information.
-```
-
-### Reference Checklist
-
-| Check | Requirement | Severity |
-|-------|-------------|----------|
-| Has "when to read" | In SKILL.md | Warning |
-| Conditions specific | Not just "when needed" | Info |
-| Conditions detectable | AI can recognize | Warning |
-| Not always needed | Should be in L2 | Warning |
-| Not never needed | Remove or justify | Info |
-
-### Loading Patterns
-
-| Pattern | Description | Status |
-|---------|-------------|--------|
-| **Conditional** | Load for specific scenarios | ✅ Correct |
-| **Always** | Load every time | ❌ Move to L2 |
-| **Never** | Never actually used | ❌ Remove |
-| **Cascading** | A says load B | ⚠️ Avoid depth |
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 高级内容分离 | 在参考文件或标记 | Info |
+| 专家选项有文档 | 用于定制 | Info |
+| 边缘情况在参考文件 | 不杂乱主正文 | Info |
 
 ---
 
-## Anti-Patterns
+## 参考文件审计
 
-### 1. Metadata Bloat
+### "何时读取"要求
+
+每个参考文件必须在 SKILL.md 中有加载指导：
+
+**好：**
+```markdown
+## 参考文件
+
+在以下情况读取 `references/api-spec.md`：
+- 用户询问 API 端点
+- 生成 API 代码
+- 调试 API 错误
+```
+
+**差：**
+```markdown
+更多信息见 references/。
+```
+
+### 参考文件检查清单
+
+| 检查 | 要求 | 严重性 |
+|------|------|--------|
+| 有"何时读取" | 在 SKILL.md 中 | Warning |
+| 条件具体 | 不只是"需要时" | Info |
+| 条件可检测 | AI 可识别 | Warning |
+| 不总是需要 | 应在 L2 | Warning |
+| 不从不需要 | 删除或说明理由 | Info |
+
+### 加载模式
+
+| 模式 | 描述 | 状态 |
+|------|------|------|
+| **条件式** | 特定场景加载 | ✅ 正确 |
+| **始终** | 每次加载 | ❌ 移到 L2 |
+| **从不** | 从不实际使用 | ❌ 删除 |
+| **级联** | A 说加载 B | ⚠️ 避免深度 |
+
+---
+
+## 反模式
+
+### 1. 元数据膨胀
 
 ```yaml
-# BAD
+# 差
 description: |
-  This skill helps with X. When triggered:
-  1. First analyze input
-  2. Process according to rules
-  Example: input "foo" produces "bar"
+  此技能帮助处理 X。触发时：
+  1. 首先分析输入
+  2. 按规则处理
+  示例：输入"foo"产生"bar"
 
-# GOOD
-description: Use when user asks to "do X" or mentions "keyword Y".
+# 好
+description: 当用户要求"做 X"或提及"关键词 Y"时使用。
 ```
 
-**Detection**: Description >300 chars with workflow/code
+**检测**：Description >300 字符且含工作流/代码
 
-### 2. Monolithic Body
+### 2. 单体正文
 
 ```markdown
-# BAD - 800+ line SKILL.md
-## Core (50 lines)
-## API Reference (200 lines)  ← Should be L3
-## Error Codes (150 lines)    ← Should be L3
-## Examples (100 lines)       ← Should be L3
+# 差 - 800+ 行 SKILL.md
+## 核心（50 行）
+## API 参考（200 行）  ← 应在 L3
+## 错误码（150 行）    ← 应在 L3
+## 示例（100 行）      ← 应在 L3
 ```
 
-**Detection**: Body >500 lines with separable sections
+**检测**：正文 >500 行且有可分离章节
 
-### 3. Essential Content in L3
+### 3. 核心内容在 L3
 
 ```markdown
-# BAD
-## Overview
-This skill processes data. See `references/workflow.md` for how.
+# 差
+## 概述
+此技能处理数据。工作方式见 `references/workflow.md`。
 ```
 
-**Detection**: Main body lacks workflow; references always needed
+**检测**：主正文缺少工作流；参考始终需要
 
-### 4. Orphan References
+### 4. 孤立参考
 
 ```
 references/
-├── spec-v1.md      # No mention in SKILL.md
-├── old-format.md   # No mention
-└── maybe-useful.md # No mention
+├── spec-v1.md      # SKILL.md 未提及
+├── old-format.md   # 未提及
+└── maybe-useful.md # 未提及
 ```
 
-**Detection**: Reference not mentioned with "when to read"
+**检测**：参考未以"何时读取"提及
 
-### 5. Reference Cascade
+### 5. 参考级联
 
 ```markdown
 # references/main.md
-For details, see `sub-spec.md`.
+详情见 `sub-spec.md`。
 
 # references/sub-spec.md
-For implementation, see `impl-notes.md`.
+实现见 `impl-notes.md`。
 ```
 
-**Detection**: References with internal cross-references; depth >1
+**检测**：参考有内部交叉引用；深度 >1
 
-### 6. Inverted Disclosure
+### 6. 倒置披露
 
 ```markdown
-# BAD order
-## Advanced Configuration   ← Expert first
-## Performance Tuning
-## Basic Usage             ← Basics buried!
+# 差的顺序
+## 高级配置   ← 专家优先
+## 性能调优
+## 基本用法   ← 基础埋底！
 ```
 
-**Detection**: "basic/simple" sections after "advanced/expert"
+**检测**："基本/简单"章节在"高级/专家"之后
 
 ---
 
-## Output Format
+## 输出格式
 
-### Progressive Loading Section
+### 渐进加载章节
 
 ```markdown
-## Progressive Loading Analysis
+## 渐进加载分析
 
-### Content Level Distribution
-| Level | Location | Size | Target | Status |
-|-------|----------|------|--------|--------|
-| L1 | frontmatter | X words | ≤100 | ✅/⚠️ |
-| L2 | SKILL.md | Y lines | ≤500 | ✅/⚠️ |
-| L3 | references/ | Z lines | No official limit | ✅/⚠️ |
-| L4 | scripts/ | W lines | No limit | ✅ |
+### 内容层级分布
+| 层级 | 位置 | 尺寸 | 目标 | 状态 |
+|------|------|------|------|------|
+| L1 | frontmatter | X 词 | ≤100 | ✅/⚠️ |
+| L2 | SKILL.md | Y 行 | ≤500 | ✅/⚠️ |
+| L3 | references/ | Z 行 | 无官方限制 | ✅/⚠️ |
+| L4 | scripts/ | W 行 | 无限制 | ✅ |
 
-### Loading Efficiency
-**Overall**: [Good/Acceptable/Needs Optimization]
+### 加载效率
+**总体**：[良好/可接受/需优化]
 
-| Metric | Status |
-|--------|--------|
-| L1 Minimality | ✅/⚠️ |
-| L2 Self-Sufficiency | ✅/⚠️ |
-| L3 Conditionality | ✅/⚠️ |
-| Disclosure Order | ✅/⚠️ |
+| 指标 | 状态 |
+|------|------|
+| L1 最小化 | ✅/⚠️ |
+| L2 自足性 | ✅/⚠️ |
+| L3 条件性 | ✅/⚠️ |
+| 披露顺序 | ✅/⚠️ |
 
-### Content Placement Issues
-| Content | Current | Recommended | Reason | Severity |
-|---------|---------|-------------|--------|----------|
-| [X] | L2 | L3 | Edge case only | Warning |
-| [Y] | L3 | L2 | Needed every time | Severe |
+### 内容放置问题
+| 内容 | 当前 | 建议 | 原因 | 严重性 |
+|------|------|------|------|--------|
+| [X] | L2 | L3 | 仅边缘情况 | Warning |
+| [Y] | L3 | L2 | 每次都需要 | Severe |
 
-### Reference Loading Guidance
-| File | Has "When to Read" | Specific | Status |
-|------|-------------------|----------|--------|
-| api-spec.md | ✅ | ✅ | Good |
-| error-codes.md | ❌ | - | Missing |
+### 参考加载指导
+| 文件 | 有"何时读取"| 具体 | 状态 |
+|------|------------|------|------|
+| api-spec.md | ✅ | ✅ | 良好 |
+| error-codes.md | ❌ | - | 缺失 |
 
-### Anti-Patterns Detected
-| Pattern | Detected | Location | Severity |
-|---------|----------|----------|----------|
-| Metadata bloat | ✅/❌ | | Warning |
-| Monolithic body | ✅/❌ | | Warning |
-| Essential in L3 | ✅/❌ | | Severe |
-| Orphan references | ✅/❌ | | Warning |
+### 检测到的反模式
+| 模式 | 检测到 | 位置 | 严重性 |
+|------|--------|------|--------|
+| 元数据膨胀 | ✅/❌ | | Warning |
+| 单体正文 | ✅/❌ | | Warning |
+| 核心在 L3 | ✅/❌ | | Severe |
+| 孤立参考 | ✅/❌ | | Warning |
 
-### Recommendations
-1. [Priority 1]: [Most impactful]
-2. [Priority 2]: [Second fix]
+### 建议
+1. [优先级 1]：[最有影响]
+2. [优先级 2]：[第二修复]
 ```
 
 ---
 
-## Severity Guidelines
+## 严重性指南
 
-| Issue | Severity |
-|-------|----------|
-| Core workflow in L3 | Severe |
-| L1 >1000 chars | Severe |
-| L2 >750 lines | Severe |
-| L2 >625 lines | Warning |
-| L2 >500 lines | Info |
-| No "when to read" | Warning |
-| Reference always needed | Warning |
-| Reference never needed | Info |
-| Inverted disclosure | Warning |
-| Metadata 300-500 chars | Info |
-| Metadata >500 chars | Warning |
+| 问题 | 严重性 |
+|------|--------|
+| 核心工作流在 L3 | Severe |
+| L1 >1000 字符 | Severe |
+| L2 >750 行 | Severe |
+| L2 >625 行 | Warning |
+| L2 >500 行 | Info |
+| 无"何时读取" | Warning |
+| 参考始终需要 | Warning |
+| 参考从不需要 | Info |
+| 倒置披露 | Warning |
+| 元数据 300-500 字符 | Info |
+| 元数据 >500 字符 | Warning |

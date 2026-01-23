@@ -1,458 +1,668 @@
-# Audit Report Output Format
+# 审计报告输出格式
 
-## Design Principles
+> **语言规则**：所有输出文本必须使用 {OUTPUT_LANGUAGE}，优先级高于下面的示例和模板。
 
-1. **Single Conclusion**: Verdict appears ONLY in the final Conclusion section
-2. **Full Transparency**: Show ALL issues (confirmed + filtered) with filter reasons
-3. **Problem-Centric**: Each issue's analysis and fix together in one place
-4. **Before/After Clarity**: All fixes use clear before/after comparison format
-5. **No Repetition**: Each information appears once only (Occam's Razor)
-6. **AI Executor Awareness**: Trust AI to understand context, don't over-specify
-7. **Logical Flow**: Overview → Analysis → Issues → Solutions → Conclusion
+## 设计原则
 
----
+1. **单一结论**：判定仅出现在最终结论章节
+2. **完全透明**：显示所有问题（已确认 + 已过滤）及过滤原因
+3. **问题为中心**：每个问题的分析和修复放在一起
+4. **前后对比清晰**：所有修复使用清晰的前后对比格式
+5. **无重复**：每条信息仅出现一次（奥卡姆剃刀）
+6. **AI 执行者意识**：信任 AI 理解上下文，不过度指定
+7. **逻辑流程**：概览 → 分析 → 问题 → 解决方案 → 结论
 
-## Report Structure
+
+## 报告结构
 
 ```
-0. Header              - Basic info (NO verdict)
-1. Assessment Overview - Rating, audit summary, coverage (score first)
-2. Cross-Cutting       - Design coherence, progressive loading, references, etc.
-3. Issue Inventory     - Statistics + 3.1 Confirmed + 3.2 Filtered
-4. Fix & Optimization  - 4.1 Fix Proposals (🔴🟡) + 4.2 Optimization Proposals (🟢)
-5. Conclusion          - Quality judgment, overall verdict, recommended actions (FINAL)
+0. 头部              - 基本信息（无判定）
+1. 评估概览          - 评分、审计摘要、覆盖率（评分优先）
+2. 横切面分析        - 执行证据、GPT 合规、设计一致性等
+3. 问题清单          - 统计 + 3.1 已确认 + 3.2 已过滤
+4. 修复与优化        - 4.1 修复提案（🔴🟡）+ 4.2 优化提案（🟢）
+5. 结论              - 质量判断、总体判定、建议行动（最终）
 ```
 
-**Total: 6 sections (0-5)**
+**共计：6 个章节（0-5）**
 
-**Key Rules**:
-- Section 1 shows rating, summary, and coverage (NO issue statistics here)
-- Section 3 shows issue statistics + all issues (confirmed + filtered)
-- Section 4 supports multiple proposals per issue (mark recommended with "Recommended")
-- Section 5 ends with Recommended Actions table as the final report output
+**关键规则**：
+- 第 1 章显示评分、摘要和覆盖率（此处无问题统计）
+- 第 2 章以**执行证据**开始，记录执行了哪些检查
+- 第 3 章显示问题统计 + 所有问题（已确认 + 已过滤）
+- 第 4 章支持每个问题多个提案（用"推荐"标记推荐方案）
+- 第 5 章以建议行动表作为最终报告输出结束
 
----
 
-## Section Specifications
+## 章节规范
 
-### 0. Header
-
-**Required fields**: Target, Type, Date, Files, Lines
-
-**Format**: Table with Item/Value columns
-
-**Rules**:
-- Maximum 5 rows
-- NO verdict or assessment language
-
----
-
-### 1. Assessment Overview
-
-**Required subsections (in order)**:
-
-#### Rating
-Table with columns: Dimension | Score | Notes
-
-**Rating Dimensions by Audit Type**:
-
-| Type | Dim 1 | Dim 2 | Dim 3 | Dim 4 |
-|------|-------|-------|-------|-------|
-| Prompt | Clarity | Completeness | Accuracy | Usability |
-| Memory | Organization | Completeness | Consistency | Effectiveness |
-| Skill | Structure | Maintainability | Documentation | Robustness |
-| Plugin | Architecture | Integration | Documentation | Extensibility |
-| Composite | Coherence | Coverage | Consistency | Robustness |
-
-#### Audit Type Results Summary
-Table with columns: Audit Type | Files | Issues | Key Findings
-
-**Audit types and checks by target**:
-
-| Target | Audit Type | Key Checks |
-|--------|------------|------------|
-| Prompt | Structure | Verbosity, scope, format, ambiguity |
-| Prompt | Content Quality | Clarity, completeness, accuracy |
-| Prompt | LLM Best Practices | Grounding, constraints, tool usage |
-| Prompt | Language Expression | Wording, fluency, terminology |
-| Memory | Structure | File location, hierarchy |
-| Memory | Import Syntax | Valid `@path` imports |
-| Memory | Content Quality | Actionable instructions |
-| Memory | Terminology | Consistent terms, defined concepts |
-| Skill | Directory | SKILL.md exists, structure |
-| Skill | SKILL.md | Frontmatter, body size, triggers |
-| Skill | Scripts | Integrity, shebang, error handling |
-| Skill | References | Size, "when to read", integrity |
-| Skill | Naming & Numbering | Sequential, consistent format |
-| Skill | Flowcharts | Diagram-text consistency, logic |
-| Plugin | Manifest | plugin.json location, fields |
-| Plugin | Commands | Frontmatter, allowed-tools, prompt quality |
-| Plugin | Agents | Name, description, tools, body quality |
-| Plugin | Hooks | Wrapper format, matchers, scripts |
-| Plugin | MCP/LSP | Valid JSON, paths, secrets |
-| Plugin | Security | No hardcoded secrets, path safety |
-| Composite | Cross-Component | References, terminology, layering |
-| Composite | Process Logic | Flow coverage, no dead loops |
-| Composite | Rule Logic | No conflicts, no duplication |
+### 0. 头部
 
-#### Coverage Statistics
-Table with columns: Category | Scanned | Verified | Filtered
+**必需字段**：目标、类型、日期、文件数、行数
 
-**Rules**:
-- NO verdict or conclusion
-- NO issue statistics (moved to Section 3)
-- Order: Rating → Summary → Coverage (score first)
+**格式**：带项目/值列的表格
 
----
+**规则**：
+- 最多 5 行
+- 无判定或评估语言
 
-### 2. Cross-Cutting Analysis
 
-**Content varies by audit type. Include applicable subsections:**
+### 1. 评估概览
 
-> **MANDATORY FIRST**: GPT Guide Compliance check results MUST appear at the beginning of this section.
+**必需子章节（按顺序）**：
 
-#### GPT Guide Compliance (MANDATORY FOR ALL TYPES)
+#### 评分
+表格列：维度 | 评分 | 备注
 
-> **Source**: GPT Prompting Guide (openai-cookbook/examples/gpt-5)
+**按审计类型的评分维度**：
 
-Check these items and report status with evidence:
+| 类型 | 维度 1 | 维度 2 | 维度 3 | 维度 4 |
+|------|--------|--------|--------|--------|
+| 提示词 | 清晰度 | 完整性 | 准确性 | 可用性 |
+| 记忆 | 组织性 | 完整性 | 一致性 | 有效性 |
+| 技能 | 结构 | 可维护性 | 文档 | 健壮性 |
+| 插件 | 架构 | 集成性 | 文档 | 可扩展性 |
+| 复合 | 一致性 | 覆盖率 | 一致性 | 健壮性 |
 
-| Check | What to Look For | Severity |
-|-------|------------------|----------|
-| Verbosity | Explicit length constraints | Severe if missing |
-| Scope | Explicit boundaries or "Do NOT" list | Severe if missing |
-| Stop conditions | Strong stop language at phase gates (multi-phase only) | Severe if weak/missing |
-| Centralization | Critical rules concentrated (not scattered >3 locations) | Severe if scattered |
-| Prohibition strength | Strong language for critical constraints | Warning if weak |
-| No fabrication | Grounding instruction for factual tasks | Severe if missing |
-| **XML structure** | XML tags wrap critical constraints (GPT-5.2+) | Severe if missing for agentic/multi-phase |
+#### 审计类型结果摘要
+表格列：审计类型 | 文件数 | 问题数 | 关键发现
 
-**XML Tags Compliance Check (GPT-5.2 MANDATORY)**:
+**按目标的审计类型和检查**：
 
-| Prompt Type | Required XML Tags | Severity if Missing |
-|-------------|-------------------|---------------------|
-| All with verbosity rules | `<output_verbosity_spec>` | Severe |
-| All with scope rules | `<design_and_scope_constraints>` | Severe |
-| Agentic/multi-phase | `<user_updates_spec>` | Severe |
-| Data extraction | `<extraction_spec>` | Severe |
-| Factual/grounding | `<uncertainty_and_ambiguity>` | Severe |
-| Tool-using | `<tool_usage_rules>` | Warning |
-| Long-context (>10k) | `<long_context_handling>` | Warning |
-| High-risk content | `<high_risk_self_check>` | Warning |
+| 目标 | 审计类型 | 关键检查 |
+|------|----------|----------|
+| 提示词 | 结构 | 详尽度、范围、格式、歧义 |
+| 提示词 | 内容质量 | 清晰度、完整性、准确性 |
+| 提示词 | LLM 最佳实践 | 接地、约束、工具使用 |
+| 提示词 | 语言表达 | 措辞、流畅度、术语 |
+| 记忆 | 结构 | 文件位置、层次结构 |
+| 记忆 | 导入语法 | 有效的 `@path` 导入 |
+| 记忆 | 内容质量 | 可操作的指令 |
+| 记忆 | 术语 | 一致术语、定义概念 |
+| 技能 | 目录 | SKILL.md 存在、结构 |
+| 技能 | SKILL.md | Frontmatter、正文尺寸、触发条件 |
+| 技能 | 脚本 | 完整性、shebang、错误处理 |
+| 技能 | 参考文件 | 尺寸、"何时读取"、完整性 |
+| 技能 | 命名与编号 | 顺序、一致格式 |
+| 技能 | 流程图 | 图文一致、逻辑 |
+| 技能 | 结构完整性 | 文件结构、规则命名/编号/顺序/层次、重复、有效性、合理性 |
+| 插件 | 清单 | plugin.json 位置、字段 |
+| 插件 | 命令 | Frontmatter、allowed-tools、提示词质量 |
+| 插件 | 代理 | 名称、描述、工具、正文质量 |
+| 插件 | 钩子 | 包装器格式、匹配器、脚本 |
+| 插件 | MCP/LSP | 有效 JSON、路径、秘密 |
+| 插件 | 安全 | 无硬编码秘密、路径安全 |
+| 插件 | 结构完整性 | 文件结构、规则命名/编号/顺序/层次、重复、有效性、合理性 |
+| 复合 | 跨组件 | 引用、术语、分层 |
+| 复合 | 流程逻辑 | 流程覆盖、无死循环 |
+| 复合 | 规则逻辑 | 无冲突、无重复 |
+| 复合 | 结构完整性 | 文件结构、规则命名/编号/顺序/层次、重复、有效性、合理性 |
 
-Output format: Table showing each check with status (✅/⚠️/❌) and evidence (line number or description).
+#### 覆盖率统计
+表格列：类别 | 已扫描 | 已验证 | 已过滤
 
-**Rules**:
-- Mandatory for all audit types
-- Failed checks become issues in Section 3
-- Apply only relevant checks based on content type
+**规则**：
+- 无判定或结论
+- 无问题统计（移到第 3 章）
+- 顺序：评分 → 摘要 → 覆盖率（评分优先）
 
-| Audit Type | Applicable Subsections |
-|------------|------------------------|
-| Prompt | Content Assessment, LLM Best Practices, Language Expression, Size Check |
-| Memory | Content Assessment, Instruction Quality, Import Syntax Check, Terminology Check, Size Check |
-| Skill | Design Coherence, Progressive Loading, Naming & Numbering, Reference Integrity, Reference Loading Guidance, Flowchart Validation, Script Quality |
-| Plugin | Structure Validation, Security Check, Design Coherence, Progressive Loading, Component Prompt Quality, Component Summary |
-| Composite | All above + Audit Scope Summary, Cross-File Review, Process Logic, Rule Logic |
 
-#### Prompt Subsections
+### 2. 横切面分析
 
-**Content Assessment**: Table (Aspect | Status | Notes)
-- Aspects: Goal Clarity, Instruction Flow, Edge Case Coverage, Ambiguity Handling
+**内容因审计类型而异。包含适用的子章节：**
 
-**LLM Best Practices**: Table (Practice | Status | Notes)
-- Practices: Verbosity Constraints, Scope Boundaries, Output Format, Grounding, Freedom Level
-- Per `type-prompt.md` LLM Prompting Best Practices section
+#### 执行证据（强制首位）
 
-**Language Expression**: Table (Check | Status | Notes)
-- Checks: Clarity, Fluency, Ambiguity Patterns, Terminology Consistency
-- Per `rules-universal.md` Language Expression Rules section
+> **来源**：`workflow-execution.md` 中的步骤 3B
+> **目的**：记录实际执行了哪些检查以确保审计完整性。
 
-**Size Check**: Table (Metric | Actual | Limit | Status)
+**输出格式**：两级显示 - 类别摘要 + 检查项 ID 明细
 
-#### Memory Subsections
+**第 1 级：类别摘要表**
 
-**Content Assessment**: Table (Aspect | Status | Notes)
-- Aspects: Goal Clarity, Instruction Flow, Edge Case Coverage, Ambiguity Handling
-
-**Instruction Quality**: Table (Check | Status | Notes)
-- Checks: Verbosity Constraints, Scope Boundaries, Actionability, Freedom Level Match
-- Per `type-prompt.md` LLM Prompting Best Practices (applies to memory file instructions)
-
-**Import Syntax Check**: Table (Import | Valid | Status)
-- Per `type-memory.md` Import Syntax section
-
-**Terminology Check**: Table (Concept | Terms Used | Consistent | Status)
-- Per `rules-universal.md` Terminology Consistency section
-
-**Size Check**: Table (Metric | Actual | Limit | Status)
-
-#### Skill Subsections
-
-**Design Coherence**: Table (Principle | Status | Notes)
-- Check principles from `cross-design-coherence.md`
-- Include red flags if detected: god files, scattered rules, circular deps
-
-**Progressive Loading**: Table (Level | Actual | Target | Status)
-- Levels: L1-L4 per `cross-progressive-loading.md`
-- Note anti-patterns if detected: metadata bloat, monolithic body, essential in L3
-
-**Naming & Numbering**: Table (Check | Expected | Actual | Status)
-- Checks: Sequential numbering, No duplicates, Format consistent, TOC-Content match
-- Per `rules-universal.md` Numbering & Order Rules section
-
-**Reference Integrity**: Table (Reference | Target | Exists | Status)
-- Checks: Named refs, Numbered refs, Anchor links, Cross-file refs
-- Per `rules-universal.md` Reference Integrity Rules section
-
-**Flowchart Validation** (if diagrams exist): Table (Check | Status | Notes)
-- Checks: Diagram-text consistency, All paths have endpoints, No infinite loops, Decision completeness
-- Per `rules-universal.md` Diagram & Flowchart Rules section
-
-**Script Quality** (if scripts exist): Table (Script | Type | Shebang | Error Handling | Dependencies | Status)
-- Per `type-skill.md` Script Integrity Verification section
-- Type column: Runtime/Dev/Helper (only Runtime requires documentation)
-
-**Reference Loading Guidance** (if references exist): Table (Reference | Has "When to Read" | Conditions Specific | Status)
-- Per `cross-progressive-loading.md` Reference File Audit section
-
-#### Plugin Subsections
-
-**Structure Validation**: Table (Check | Expected | Actual | Status)
-- Checks: Manifest location, Component locations, Naming conventions, Path variables
-- Per `type-plugin.md` Plugin Structure section
-
-**Security Check**: Table (Check | Status | Notes)
-- Checks: No hardcoded secrets, No exposed credentials, Path traversal prevention, Input validation
-- Per `rules-universal.md` Security & Compliance Rules section
-
-**Design Coherence**: Table (Principle | Status | Notes)
-- Check principles from `cross-design-coherence.md`
-- Include red flags if detected: god files, scattered rules, circular deps
-
-**Progressive Loading**: Table (Level | Actual | Target | Status)
-- Levels: L1-L4 per `cross-progressive-loading.md`
-- Note anti-patterns if detected: metadata bloat, monolithic body, essential in L3
-
-**Component Prompt Quality**: Table (Component | Type | Triggers Clear | Body Quality | Status)
-- Components: Commands, Agents with prompt bodies
-- Per `type-plugin.md` Command/Agent quality sections
-
-**Component Summary**: Table (Component | Count | Issues)
-- Components: Commands, Agents, Hooks, MCP Servers, LSP Servers
-- For Hooks: note invalid matchers or missing scripts
-- For MCP/LSP: note invalid JSON or path issues
-
-#### Composite Subsections
-
-**Audit Scope Summary**: Table (Category | Count | Details)
-- Categories: Files Scanned, Components Found, Rules Extracted
-- Purpose: Show audit coverage for transparency
-- Rules Extracted: count behavioral, constraint, format rules found across all files
-
-**Cross-File Review**: Includes:
-- Reference Integrity: Table (Source | Target | Status)
-- Terminology Consistency: Table (Concept | Terms Used | Status) - only if issues found
-- Rule Layering: Table (Rule | Location | Level | Status) - per `cross-composite.md`
-- Note global rules not propagated to local files if detected
-
-**Process Logic**: Table (Check | Status | Notes)
-- Checks: All scenarios covered, Main flow clear, No dead loops, No duplicate invocations
-- Per `ref-checklist.md` Dimension 5.2 Process Logic section
-
-**Rule Logic**: Table (Check | Status | Notes)
-- Checks: No rule conflicts, No rule duplication, Rules properly categorized, Rule priority clear
-- Per `ref-checklist.md` Dimension 5.1 Rule Logic section
-- If conflicts found, note conflict type: same-file, cross-file, or principle-rule
-
-**Rules**:
-- Include only applicable subsections for the audit type
-- Omit empty subsections (e.g., no Script Quality if no scripts, no Flowchart if no diagrams)
-- Show check results only, NO conclusion statements
-- Use ✅/⚠️/❌ for status
-
----
-
-### 3. Issue Inventory
-
-#### Issue Statistics
-Table with columns: Category | Count
-
-Categories: 🔴 Must Fix, 🟡 Should Fix, 🟢 Optional, ⚪ Filtered, **Total**
-
-#### Issue Breakdown by Dimension (Optional)
-Table with columns: Dimension | 🔴 | 🟡 | 🟢 | Total
-
-**Dimensions**:
-| Code | Dimension | Examples |
-|------|-----------|----------|
-| D0.1 | Cross-Component | Broken cross-refs, terminology inconsistent |
-| D0.2 | Design Coherence | Rule conflicts, scattered rules, red flags |
-| D0.3 | Progressive Loading | Content misplacement, L1 bloat, orphan refs |
-| D0.4 | Naming & Numbering | Non-sequential, format inconsistent |
-| D0.5 | Reference Integrity | Broken refs, circular deps |
-| D0.6 | Diagram & Flowchart | Path mismatch, no endpoints |
-| D0.7 | Language Expression | Ambiguity, unclear wording |
-| D0.8 | Security & Compliance | Hardcoded secrets, path traversal |
-| D5.1 | Rule Logic | Conflicts, duplication |
-| D5.2 | Process Logic | Dead loops, missing scenarios |
-| D-ST | Structure | Missing required fields |
-| D-SZ | Size | Exceeds limits |
-| D-OT | Other | Miscellaneous issues |
-
-**Note**: Only include this breakdown when multiple dimensions have issues.
-
-#### 3.1 Confirmed Issues
-
-Group by severity level (🔴 → 🟡 → 🟢), each severity group as a separate markdown table.
-
-**Table format**:
-
-| # | File | Line | Issue Summary | Dimension | Fix Type |
-|---|------|------|---------------|-----------|----------|
-
-**Issue numbering**: Sequential across all severity groups (1, 2, 3...)
-
-**Fix Types** (priority order): DELETE > MERGE > RESTRUCTURE > MODIFY > ADD
-
-#### 3.2 Filtered Issues
-
-**Table format**:
-
-| # | File | Line | Issue Description | Filter Reason |
-|---|------|------|-------------------|---------------|
-
-**Filter Reason Codes**: FR-SC (No scenario), FR-DS (Design choice), FR-AI (AI capable), FR-TH (Below threshold), FR-TOL (Within tolerance)
-
-**Numbering**: F1, F2, F3...
-
----
-
-### 4. Fix & Optimization Proposals
-
-> **CRITICAL**: Section 4 MUST contain proposals for ALL confirmed issues from Section 3.1. If Section 3.1 has 4 issues, Section 4 MUST have 4 corresponding proposals.
-
-#### 4.1 Fix Proposals (🔴 Must Fix, 🟡 Should Fix)
-
-**Grouping**: By file (use 📄 marker)
-
-**Per issue format** (use same issue number as Section 3.1):
+| 类别 | 注册表 | 已执行 | 总计/通过/问题 | 发现问题 |
+|------|--------|--------|----------------|----------|
+| GPT 指南合规 | P-0xx | ✅/❌ | 6/5/1 | 1 |
+| 命名与编号 | N-xxx, B-xxx | ✅/❌ | 9/9/0 | 0 |
+| 引用完整性 | R-xxx | ✅/❌ | 7/6/1 | 1 |
+| 结构与组织 | S-xxx | ✅/❌ | 10/10/0 | 0 |
+| 语言表达 | L-xxx | ✅/❌ | 4/4/0 | 0 |
+| 安全与合规 | X-xxx | ✅/❌ | 3/3/0 | 0 |
+| 尺寸阈值 | F-7xx | ✅/❌ | 4/4/0 | 0 |
+| [类型特定] | K/G-xxx | ✅/❌ | N/M/K | K |
+
+**第 2 级：检查项 ID 明细（强制）**
+
+对于每个类别，列出所有已执行的检查项 ID 及状态：
 
 ```
-#### 问题 1: [Title] — [Severity Icon] [Severity Level]
+### 执行的检查项明细
 
-**Location**: [File:Lines]
+**GPT 指南合规 (P-0xx)**:
+P-001✅ P-002✅ P-003✅ P-005✅ P-201✅ P-203⚠️#1 P-705✅ P-805✅
 
-**Problem**: [Description of what's wrong and why it matters]
+**命名 (N-xxx)**:
+N-001✅ N-002✅ N-003✅ N-004✅ N-005✅ N-006✅ N-007✅ N-008✅ N-009✅
 
-**Impact**: [Severity assessment]
+**引用 (R-xxx)**:
+R-101✅ R-102- R-103✅ R-104✅ R-105- R-108- R-303✅
 
-**Current**:
+[...其他类别...]
+
+图例: ✅通过 ⚠️问题(带问题编号) ❌失败 -跳过(条件不满足)
+```
+
+**已跳过（含原因）**：[列出任何跳过的类别及原因]
+
+**规则**：
+- 每个 ✅ 类别必须有证据和检查项 ID 列表
+- 每个 ❌ 类别必须在"已跳过"部分有跳过原因
+- 核心类别（GPT 合规、命名、引用、语言、尺寸）不能跳过
+- 有问题的检查项 ID 必须链接到问题编号（如 ⚠️#1）
+- 因条件不满足而跳过的检查使用 `-`（如 R-102- 当无编号引用时）
+- 此章节记录审计执行，不是发现（发现在第 3 章）
+
+#### GPT 指南合规（所有类型强制）
+
+> **来源**：GPT Prompting Guide (openai-cookbook/examples/gpt-5)
+
+检查这些项目并报告状态及证据：
+
+| 检查 | 查找内容 | 严重性 |
+|------|----------|--------|
+| 详尽度 | 显式长度约束 | 缺失则 Severe |
+| 范围 | 显式边界或"禁止"列表 | 缺失则 Severe |
+| 停止条件 | 阶段门有强停止语言（仅多阶段）| 弱/缺失则 Severe |
+| 集中化 | 关键规则集中（不分散 >3 处）| 分散则 Severe |
+| 禁止强度 | 关键约束用强语言 | 弱则 Warning |
+| 无编造 | 事实任务有接地指令 | 缺失则 Severe |
+| **结构化标签块** | 尖括号标签（`<tag>...</tag>`）包装关键约束 | 复杂提示词缺失则 Warning |
+
+**结构化标签块检查（最佳实践）**：
+
+> **标签名称可自定义** - 审计检查结构化分组存在性，而非特定标签名称。
+
+| 提示词类型 | 推荐：标签块包装... | 缺失时严重性 |
+|------------|---------------------|--------------|
+| 所有有详尽度规则的 | 长度/格式约束 | Info |
+| 所有有范围规则的 | 范围边界 | Info |
+| 代理式/多阶段 | 代理通信规则 | Warning |
+| 数据提取 | 输出 Schema | Warning |
+| 事实性/接地 | 防幻觉 | Info |
+| 使用工具的 | 工具调用规则 | Info |
+| 长上下文（>10k）| 上下文处理规则 | Info |
+| 高风险内容 | 验证步骤 | Info |
+
+输出格式：表格显示每个检查的状态（✅/⚠️/❌）和证据（行号或描述）。
+
+**规则**：
+- 所有审计类型强制
+- 失败的检查成为第 3 章的问题
+- 仅应用基于内容类型的相关检查
+
+| 审计类型 | 适用子章节 |
+|----------|------------|
+| 提示词 | **执行证据**、GPT 指南合规、内容评估、LLM 最佳实践、语言表达、尺寸检查、结构化标签 |
+| 记忆 | **执行证据**、GPT 指南合规、内容评估、指令质量、导入语法检查、术语检查、尺寸检查、结构化标签 |
+| 技能 | **执行证据**、GPT 指南合规、设计一致性、渐进加载、命名与编号、引用完整性、参考加载指导、流程图验证、脚本质量、结构完整性、运行时行为、同类文件一致性、结构化标签 |
+| 插件 | **执行证据**、GPT 指南合规、结构验证、安全检查、设计一致性、渐进加载、组件提示词质量、组件摘要、结构完整性、运行时行为、同类文件一致性、结构化标签 |
+| 复合 | **执行证据**、GPT 指南合规、以上全部 + 审计范围摘要、跨文件审查、流程逻辑、规则逻辑、结构完整性、运行时行为、同类文件一致性、结构化标签 |
+
+#### 提示词子章节
+
+**内容评估**：表格（方面 | 状态 | 备注）
+- 方面：目标清晰度、指令流程、边缘情况覆盖、歧义处理
+
+**LLM 最佳实践**：表格（实践 | 状态 | 备注）
+- 实践：详尽度约束、范围边界、输出格式、接地、自由度级别
+- 按 `type-prompt.md` LLM 提示词最佳实践章节
+
+**语言表达**：表格（检查 | 状态 | 备注）
+- 检查：清晰度、流畅度、歧义模式、术语一致性
+- 按 `rules-universal.md` 语言表达规则章节
+
+**尺寸检查**：表格（指标 | 实际 | 限制 | 状态）
+
+#### 记忆子章节
+
+**内容评估**：表格（方面 | 状态 | 备注）
+- 方面：目标清晰度、指令流程、边缘情况覆盖、歧义处理
+
+**指令质量**：表格（检查 | 状态 | 备注）
+- 检查：详尽度约束、范围边界、可操作性、自由度匹配
+- 按 `type-prompt.md` LLM 提示词最佳实践（适用于记忆文件指令）
+
+**导入语法检查**：表格（导入 | 有效 | 状态）
+- 按 `type-memory.md` 导入语法章节
+
+**术语检查**：表格（概念 | 使用的术语 | 一致 | 状态）
+- 按 `rules-universal.md` 术语一致性章节
+
+**尺寸检查**：表格（指标 | 实际 | 限制 | 状态）
+
+#### 技能子章节
+
+**设计一致性**：表格（原则 | 状态 | 备注）
+- 检查 `cross-design-coherence.md` 中的原则
+- 如检测到红旗则包含：上帝文件、分散规则、循环依赖
+
+**渐进加载**：表格（层级 | 实际 | 目标 | 状态）
+- 层级：按 `cross-progressive-loading.md` 的 L1-L4
+- 如检测到反模式则注明：元数据膨胀、单体正文、核心在 L3
+
+**命名与编号**：表格（检查 | 期望 | 实际 | 状态）
+- 检查：顺序编号、无重复、格式一致、目录-内容匹配
+- 按 `rules-universal.md` 编号与顺序规则章节
+
+**引用完整性**：表格（引用 | 目标 | 存在 | 状态）
+- 检查：命名引用、编号引用、锚点链接、跨文件引用
+- 按 `rules-universal.md` 引用完整性规则章节
+
+**流程图验证**（如有图表）：表格（检查 | 状态 | 备注）
+- 检查：图文一致、所有路径有终点、无无限循环、决策完整
+- 按 `rules-universal.md` 图表与流程图规则章节
+
+**脚本质量**（如有脚本）：表格（脚本 | 类型 | Shebang | 错误处理 | 依赖 | 状态）
+- 按 `type-skill.md` 脚本完整性验证章节
+- 类型列：运行时/开发/辅助（仅运行时需要文档）
+
+**参考加载指导**（如有参考文件）：表格（参考文件 | 有"何时读取" | 条件具体 | 状态）
+- 按 `cross-progressive-loading.md` 参考文件审计章节
+
+**结构完整性**（如基于规则的内容）：表格（检查 | 状态 | 备注）
+- 检查：文件结构、规则命名、规则编号、规则顺序、规则层次、重复规则、引用完整性、规则有效性、规则合理性
+- 按 `rules-structure-integrity.md` 完整审计检查清单
+
+**运行时行为**（如有运行时逻辑）：表格（检查 | 状态 | 备注）
+- 检查：术语准确性、命名冲突检测、路由规则（如有分发）、阶段/命令/工具触发器/流程/输出（如适用）、冲突检测、渐进加载合规
+- 按 `rules-runtime-behavior.md` 完整审计检查清单
+
+**同类文件一致性**（如多文件）：表格（类别 | 文件数 | 一致 | 偏差 | 合理）
+- 类别：type-*.md、cross-*.md、rules-*.md、ref-*.md 等
+- 按 `cross-design-coherence.md` 同类文件一致性章节
+- 注明不合理偏差的具体文件和偏差描述
+
+#### 插件子章节
+
+**结构验证**：表格（检查 | 期望 | 实际 | 状态）
+- 检查：清单位置、组件位置、命名约定、路径变量
+- 按 `type-plugin.md` 插件结构章节
+
+**安全检查**：表格（检查 | 状态 | 备注）
+- 检查：无硬编码秘密、无暴露凭据、防路径遍历、输入验证
+- 按 `rules-universal.md` 安全与合规规则章节
+
+**设计一致性**：表格（原则 | 状态 | 备注）
+- 检查 `cross-design-coherence.md` 中的原则
+- 如检测到红旗则包含：上帝文件、分散规则、循环依赖
+
+**渐进加载**：表格（层级 | 实际 | 目标 | 状态）
+- 层级：按 `cross-progressive-loading.md` 的 L1-L4
+- 如检测到反模式则注明：元数据膨胀、单体正文、核心在 L3
+
+**组件提示词质量**：表格（组件 | 类型 | 触发清晰 | 正文质量 | 状态）
+- 组件：有提示词正文的命令、代理
+- 按 `type-plugin.md` 命令/代理质量章节
+
+**组件摘要**：表格（组件 | 数量 | 问题）
+- 组件：命令、代理、钩子、MCP 服务器、LSP 服务器
+- 钩子：注明无效匹配器或缺失脚本
+- MCP/LSP：注明无效 JSON 或路径问题
+
+#### 复合子章节
+
+**审计范围摘要**：表格（类别 | 数量 | 详情）
+- 类别：已扫描文件、发现组件、提取规则
+- 目的：显示审计覆盖率以确保透明
+- 提取规则：统计所有文件中发现的行为、约束、格式规则数
+
+**跨文件审查**：包含：
+- 引用完整性：表格（来源 | 目标 | 状态）
+- 术语一致性：表格（概念 | 使用的术语 | 状态）- 仅当发现问题时
+- 规则分层：表格（规则 | 位置 | 层级 | 状态）- 按 `cross-composite.md`
+- 如检测到全局规则未传播到本地文件则注明
+
+**流程逻辑**：表格（检查 | 状态 | 备注）
+- 检查：所有场景覆盖、主流程清晰、无死循环、无重复调用
+- 按 `ref-checklist.md` 维度 5.2 流程逻辑章节
+
+**规则逻辑**：表格（检查 | 状态 | 备注）
+- 检查：无规则冲突、无规则重复、规则正确分类、规则优先级清晰
+- 按 `ref-checklist.md` 维度 5.1 规则逻辑章节
+- 如发现冲突，注明冲突类型：同文件、跨文件或原则-规则
+
+**结构完整性**（如基于规则的内容）：表格（检查 | 状态 | 备注）
+- 检查：文件结构、规则命名、规则编号、规则顺序、规则层次、重复规则、引用完整性、规则有效性、规则合理性
+- 按 `rules-structure-integrity.md` 完整审计检查清单
+
+**运行时行为**（如有运行时逻辑）：表格（检查 | 状态 | 备注）
+- 检查：术语准确性、命名冲突检测、路由规则（如有分发）、阶段/命令/工具触发器/流程/输出（如适用）、冲突检测、渐进加载合规
+- 按 `rules-runtime-behavior.md` 完整审计检查清单
+- 仅包含基于内容类型的适用检查（阶段、命令、工具）
+
+**同类文件一致性**（如多文件）：表格（类别 | 文件数 | 一致 | 偏差 | 合理）
+- 类别：type-*.md、cross-*.md、rules-*.md、ref-*.md 等
+- 按 `cross-design-coherence.md` 同类文件一致性章节
+- 注明不合理偏差的具体文件和偏差描述
+
+#### 结构化标签子章节（所有类型）
+
+**结构化标签**：表格（检查 | 状态 | 备注）
+- 检查：标签闭合、命名约定、内容正确性、语义匹配
+- 按 `rules-universal.md` → 结构化标签块章节
+
+| 检查 | 验证内容 | 状态 |
+|------|----------|------|
+| 标签正确闭合 | `</tag>` 匹配 `<tag>` | ✅/⚠️/❌ |
+| 无未闭合/孤立标签 | 所有标签有匹配对 | ✅/⚠️/❌ |
+| 命名约定 | 使用 `snake_case` 格式 | ✅/⚠️/❌ |
+| 内容匹配目的 | 约束标签有约束，推理标签有推理 | ✅/⚠️/❌ |
+| 推理标签无执行 | 推理标签仅包含判断标准 | ✅/⚠️/❌ |
+
+**规则**：
+- 仅包含审计类型适用的子章节
+- 省略空子章节（如无脚本则无脚本质量，无图表则无流程图）
+- 仅显示检查结果，无结论陈述
+- 状态使用 ✅/⚠️/❌
+
+
+### 3. 问题清单
+
+#### 问题统计
+表格列：类别 | 数量
+
+类别：🔴 必须修复、🟡 应该修复、🟢 可选、⚪ 已过滤、**总计**
+
+#### 按维度的问题分布（可选）
+表格列：维度 | 🔴 | 🟡 | 🟢 | 总计
+
+**维度**（与 `ref-checklist.md` 对齐）：
+| 代码 | 维度 | 示例 | 适用于 |
+|------|------|------|--------|
+| D0 | 结构 | 清单缺失、位置错误 | 仅插件 |
+| D0.1 | 跨组件 | 断裂跨引用、术语不一致 | 多组件 |
+| D0.2 | 设计一致性 | 规则冲突、分散规则、红旗 | 多文件 |
+| D0.3 | 渐进加载 | 内容放置错误、L1 膨胀、孤立参考 | 技能/插件 |
+| D0.4 | 命名与编号 | 非顺序、格式不一致 | 全部 |
+| D0.5 | 引用完整性 | 断裂引用、循环依赖 | 全部 |
+| D0.6 | 图表与流程图 | 路径不匹配、无终点 | 如有图表 |
+| D0.7 | 语言表达 | 歧义、措辞不清 | 全部 |
+| D0.8 | 安全与合规 | 硬编码秘密、路径遍历 | 全部 |
+| D0.8.1 | 跨平台路径 | 路径无引号、缺少 UTF-8 编码 | 如有脚本 |
+| D0.9 | 结构化标签 | 未闭合标签、命名问题、内容错误 | 如有标签 |
+| D0.10 | 结构完整性 | 规则命名/编号/顺序/层次问题、重复、无效规则 | 如基于规则 |
+| D0.11 | 运行时行为 | 术语冲突、路由错误、阶段/命令/工具流程问题 | 如有运行时逻辑 |
+| D0.12 | 同类文件一致性 | 同类文件间结构/格式/顺序不一致 | 多文件 |
+| D1-2 | Fatal 与 Severe | 矛盾、不可能条件、执行阻塞 | 全部 |
+| D3-6 | 质量 | 语义歧义、重复、组织差、健壮性差距 | 全部 |
+| D7-8 | 优化 | 结构改进、可读性、架构 | 全部 |
+
+**注意**：仅当多个维度有问题时包含此分布。
+
+#### 3.1 已确认问题
+
+**输出格式**：按严重性分组的 Markdown 表格（🔴 → 🟡 → 🟢）
+
+```
+🔴 必须修复
+
+| # | 文件 | 行 | 问题摘要 | 维度 | 修复类型 |
+|---|------|-----|----------|------|----------|
+| 1 | ... | ... | ... | ... | ... |
+
+🟡 应该修复
+
+| # | 文件 | 行 | 问题摘要 | 维度 | 修复类型 |
+|---|------|-----|----------|------|----------|
+| 2 | ... | ... | ... | ... | ... |
+
+🟢 可选
+
+| # | 文件 | 行 | 问题摘要 | 维度 | 修复类型 |
+|---|------|-----|----------|------|----------|
+| 3 | ... | ... | ... | ... | ... |
+```
+
+**问题编号**：跨所有严重性组顺序编号（1, 2, 3...）
+
+**修复类型**（优先级顺序）：删除 > 合并 > 重组 > 修改 > 添加
+
+#### 3.2 已过滤问题
+
+**表格格式**：
+
+| # | 文件 | 行 | 问题描述 | 过滤原因 |
+|---|------|-----|----------|----------|
+
+**过滤原因代码**：FR-SC（无场景）、FR-DS（设计选择）、FR-AI（AI 可推断）、FR-TH（低于阈值）、FR-TOL（在容差内）
+
+**编号**：F1, F2, F3...
+
+
+### 4. 修复与优化提案
+
+> **关键**：第 4 章必须包含第 3.1 章所有已确认问题的提案。如果第 3.1 章有 4 个问题，第 4 章必须有 4 个对应提案。
+
+#### 4.1 修复提案（🔴 必须修复、🟡 应该修复）
+
+**分组**：按文件（使用 📄 标记）
+
+**每个问题格式**（使用与第 3.1 章相同的问题编号，按 OUTPUT_LANGUAGE 翻译"问题"）：
+
+```
+#### 问题 1：[标题] — [严重性图标] [严重性级别]
+
+**位置**：[文件:行]
+
+**问题**：[什么错了以及为什么重要的描述]
+
+**影响**：[严重性评估]
+
+**当前**：
 ```text
-[Original content]
+[原始内容]
 ```
 
-**Proposal A**: [Brief description] — Recommended
+**方案 A**：[简要描述] — 推荐
 ```text
-[Fixed content option A]
+[修复内容选项 A]
 ```
 
-**Proposal B**: [Brief description]
+**方案 B**：[简要描述]
 ```text
-[Fixed content option B]
+[修复内容选项 B]
 ```
+
+────────────────────────────────────────────────────────────────────────────────
+
+#### 问题 2：[标题] — [严重性图标] [严重性级别]
+...
 ```
 
-#### 4.2 Optimization Proposals (🟢 Optional)
+#### 4.2 优化提案（🟢 可选）
 
-Same format as 4.1, with additional field:
+与 4.1 格式相同，增加字段：
 
-**Benefit**: [Why this improvement helps]
+**收益**：[此改进为何有帮助]
 
-**Rules**:
-- 4.1 contains only 🔴 and 🟡 issues
-- 4.2 contains only 🟢 issues
-- **MUST have proposal for EVERY confirmed issue** (1:1 mapping with Section 3.1)
-- Issue numbers MUST match Section 3.1 (问题 1, 问题 2, 问题 3...)
-- Multiple proposals per issue allowed, mark recommended with "— Recommended"
-- Each issue has: Location, Problem, Impact, Current, Proposal(s)
-- Code blocks ready for copy-paste
-- Use `---` separator between issues
+**规则**：
+- 4.1 仅包含 🔴 和 🟡 问题
+- 4.2 仅包含 🟢 问题
+- **必须为每个已确认问题提供提案**（与第 3.1 章 1:1 映射）
+- 问题编号必须匹配第 3.1 章（问题 1、问题 2、问题 3...）
+- 每个问题允许多个提案，用"— 推荐"标记推荐方案
+- 每个问题有：位置、问题、影响、当前、提案
+- 代码块可直接复制粘贴
+- 每个问题之间使用 `────────────────────────────────────────────────────────────────────────────────` 分隔符（如上模板所示）
 
----
+<citation_verification_for_proposals>
+**"当前"内容验证规则（强制）**：
 
-### 5. Conclusion
+1. **"当前"内容必须经过步骤 7B 验证**：
+   - 内容必须从 Read 工具结果中**直接复制**
+   - 禁止凭记忆或"印象"书写
+   - 禁止使用"大概是这样"的内容
 
-> **CRITICAL**: This is the FINAL section. NO content after "Recommended Actions" table.
-> **PHASE GATE**: After outputting this section, STOP and wait for user input. Do NOT apply any fixes until user confirms.
+2. **行号必须精确**：
+   - 行号必须与实际文件一致
+   - 如果内容跨多行，标注起止行号（如 `行 123-125`）
 
-**Required subsections (in order)**:
+3. **验证失败的问题不得出现在报告中**：
+   - 如果步骤 7B 发现"当前"内容不存在 → 该问题必须被删除
+   - 报告中的每个问题都必须是**可验证**的
 
-#### Verification Statistics
-Single line: `Scanned X suspected issues → Verified Y → Filtered Z`
+4. **内容引用格式**：
+   - 短内容（≤3 行）：完整引用
+   - 长内容（>3 行）：引用关键部分 + "...（共 N 行）"
+</citation_verification_for_proposals>
 
-#### Quality Judgment
-Table with columns: Judgment | Criteria | Result
 
-**Judgment criteria**:
-| Judgment | Condition |
-|----------|-----------|
-| ✅ Pass | No 🔴 Must Fix issues |
-| ⚠️ Needs Work | Has 🔴 Must Fix issues |
-| ❌ Fail | Multiple severe 🔴 issues affecting core functionality |
+### 5. 结论
 
-#### Overall Verdict
-One sentence summarizing: confirmed count, filtered count, overall quality, main issue areas
-- For composite systems: briefly note the core design philosophy observed
+> **关键**：这是最终章节。"建议行动"表之后无内容。
+> **阶段门**：输出此章节后，停止并等待用户输入。在用户确认前不要应用任何修复。
 
-#### Recommended Actions (FINAL OUTPUT)
+**必需子章节（按顺序）**：
 
-**Required elements**:
+#### 验证统计
+单行：`扫描 X 个疑似问题 → 验证 Y 个 → 过滤 Z 个`
 
-1. **Fix Issues Summary Table** (if 🔴🟡 issues exist):
+#### 质量判断
+表格列：判断 | 标准 | 结果
 
-| # | Issue Summary | Section Reference |
-|---|---------------|-------------------|
+**判断标准**：
+| 判断 | 条件 |
+|------|------|
+| ✅ 通过 | 无 🔴 必须修复问题 |
+| ⚠️ 需改进 | 有 🔴 必须修复问题 |
+| ❌ 未通过 | 多个严重 🔴 问题影响核心功能 |
 
-2. **Optimization Issues Summary Table** (if 🟢 issues exist):
+#### 总体判定
+一句话总结：已确认数、已过滤数、整体质量、主要问题领域
+- 对于复合系统：简要说明观察到的核心设计理念
 
-| # | Issue Summary | Section Reference |
-|---|---------------|-------------------|
+#### 建议行动（最终输出）
 
-3. **Numbered Action Options**: List actions with numbers (1, 2, 3...), prompt user to input number to select
+**输出格式**（按 OUTPUT_LANGUAGE 翻译标签）：
 
-**Rules**:
-- User inputs: single "1", multiple "1,2", range "1-3", or "all"
-- Use output language configured at top of SKILL.md
-- **STOP HERE** - This is the FINAL OUTPUT. Wait for user selection before applying any changes.
-- Do NOT automatically apply fixes. User must explicitly confirm which fixes to apply.
+```
+**[待修复问题]**：
 
----
+| # | 问题摘要 | 章节引用 |
+|---|----------|----------|
+| 1 | ... | 4.1 问题 1 |
+| 2 | ... | 4.1 问题 2 |
 
-## Reference Tables
+**[待优化问题]**：
 
-### Rating Scale
+| # | 问题摘要 | 章节引用 |
+|---|----------|----------|
+| 3 | ... | 4.2 问题 3 |
 
-| Stars | Score | Meaning |
-|-------|-------|---------|
-| ⭐⭐⭐⭐⭐ | 5/5 | Excellent - No issues |
-| ⭐⭐⭐⭐☆ | 4/5 | Good - Minor issues only |
-| ⭐⭐⭐☆☆ | 3/5 | Average - Some issues |
-| ⭐⭐☆☆☆ | 2/5 | Below Average - Significant issues |
-| ⭐☆☆☆☆ | 1/5 | Poor - Major issues |
+**[操作选项]**：
+- 输入 `1` 或 `1,2` 或 `1-3` 选择修复项
+- 输入 `all` 应用所有
+- 输入其他内容继续对话
+```
 
-### Severity Levels
+**规则**：
+- 按 SKILL.md 中的 OUTPUT_LANGUAGE 翻译所有标签和说明
+- 用户输入：单个 "1"、多个 "1,2"、范围 "1-3" 或 "all"
+- **在此停止** - 这是最终输出。在用户选择前等待，不要应用任何更改。
+- 不要自动应用修复。用户必须明确确认要应用哪些修复。
 
-| Level | Icon | Criteria |
-|-------|------|----------|
-| Must Fix | 🔴 | Function broken, or ≥60% executors fail |
-| Should Fix | 🟡 | Quality impact, or ≥40% suboptimal results |
-| Optional | 🟢 | Enhances experience, not required |
-| Filtered | ⚪ | Did not pass 4-point verification |
 
----
+## 参考表
 
-## Output Rules
+### 评分量表
 
-- **Output method**: Print report directly in terminal
-- **When no issues found**: Output all sections following the structure, statistics show 0, verdict is Pass
+| 星级 | 分数 | 含义 |
+|------|------|------|
+| ⭐⭐⭐⭐⭐ | 5/5 | 优秀 - 无问题 |
+| ⭐⭐⭐⭐☆ | 4/5 | 良好 - 仅小问题 |
+| ⭐⭐⭐☆☆ | 3/5 | 一般 - 有些问题 |
+| ⭐⭐☆☆☆ | 2/5 | 欠佳 - 显著问题 |
+| ⭐☆☆☆☆ | 1/5 | 差 - 重大问题 |
+
+### 严重性级别
+
+| 级别 | 图标 | 标准 |
+|------|------|------|
+| 必须修复 | 🔴 | 功能损坏，或 ≥60% 执行者失败 |
+| 应该修复 | 🟡 | 质量影响，或 ≥40% 次优结果 |
+| 可选 | 🟢 | 增强体验，非必需 |
+| 已过滤 | ⚪ | 未通过四点核心验证 |
+
+
+## 输出规则
+
+- **输出方式**：仅保存报告到文件（不在终端显示）
+- **无问题时**：按结构输出所有章节，统计显示 0，判定为通过
+
+### 报告保存规则
+
+**保存脚本**：`scripts/save_report.py`（Python 3，跨平台）
+
+**用法**：
+```bash
+# Windows:
+python -X utf8 scripts/save_report.py --project "{project_name}" --output-dir "{output_dir}" --content "{report_content}"
+
+# macOS/Linux:
+python3 scripts/save_report.py --project "{project_name}" --output-dir "{output_dir}" --content "{report_content}"
+
+# 通过 stdin（所有平台）:
+echo "{report_content}" | python3 scripts/save_report.py --project "{project_name}" --output-dir "{output_dir}"
+```
+
+**跨平台注意**：
+- Windows：使用 `python -X utf8` 支持中文字符
+- macOS/Linux：使用 `python3`，UTF-8 是默认
+- 所有平台：用 `"` 引用所有路径以兼容中文/空格
+
+**保存位置**：与审计项目相同的目录（不在项目内部）
+
+**文件名格式**：`审计报告_{project_name}_{timestamp}.md`
+
+| 审计目标 | project_name 值 | output_dir |
+|----------|-----------------|------------|
+| 目录（如 `/path/to/my-skill`）| 目录名（`my-skill`）| 父目录（`/path/to`）|
+| 文件（如 `/path/to/config.md`）| 无扩展名的文件名（`config`）| 文件目录（`/path/to`）|
+| 粘贴文本 | `inline_text` | 当前工作目录 |
+
+**时间戳格式**：`YYYYMMDD_HHmmss`（如 `20240115_143052`）
+
+**示例保存路径**：
+| 审计目标 | 保存路径 |
+|----------|----------|
+| `E:\projects\hello-auditkit` | `E:\projects\审计报告_hello-auditkit_20240115_143052.md` |
+| `D:\code\myproject\CLAUDE.md` | `D:\code\myproject\审计报告_CLAUDE_20240115_143052.md` |
+| 粘贴文本（CWD: `C:\work`）| `C:\work\审计报告_inline_text_20240115_143052.md` |
+
+**执行流程**：
+1. 在内存中生成完整审计报告内容（第 0-5 章）
+2. 运行 save_report.py 脚本保存报告内容
+3. 从脚本 stdout 捕获输出路径
+4. **回退策略**（如脚本失败或无输出）：
+   - 使用 CLI 内置文件写入能力保存报告
+   - 相同的文件名格式和输出目录规则
+   - 如所有写入方法都失败，最后手段是在终端显示完整报告
+
+**终端输出**（仅简短摘要）：
+```
+审计完成: 🔴{n} 🟡{n} 🟢{n} | 判定: {通过/需改进/未通过}
+审计报告已保存至: {full_path}
+
+请查看报告后输入要修复的问题编号:
+- 输入 1 或 1,2 或 1-3 选择修复项
+- 输入 all 应用所有修复
+- 输入其他内容继续对话
+```
+
+**报告内容**：保存的文件包含完整审计报告，包括：
+- 第 0 章：头部
+- 第 1 章：评估概览
+- 第 2 章：横切面分析
+- 第 3 章：问题清单
+- 第 4 章：修复与优化提案
+- 第 5 章：结论

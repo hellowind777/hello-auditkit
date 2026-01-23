@@ -1,2 +1,10 @@
 .claude/settings.local.json
 COMMIT_MESSAGE.md
+
+# Skill runtime artifacts / caches
+hello-auditkit/output/*
+!hello-auditkit/output/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
