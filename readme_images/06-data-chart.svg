@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="240" viewBox="0 0 640 240">
+  <rect width="640" height="240" rx="18" fill="#0b1220"/>
+  <g>
+    <rect x="90" y="120" width="70" height="90" fill="#22c55e"/>
+    <rect x="210" y="80" width="70" height="130" fill="#0ea5e9"/>
+    <rect x="330" y="50" width="70" height="160" fill="#a78bfa"/>
+    <rect x="450" y="95" width="70" height="115" fill="#f59e0b"/>
+  </g>
+  <g fill="#cbd5e1" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial">
+    <text x="320" y="34" text-anchor="middle" font-size="16">Example data (illustration)</text>
+  </g>
+</svg>

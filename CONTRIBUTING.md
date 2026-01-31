@@ -1,25 +1,23 @@
-# Contributing
+# Contributing to hello-auditkit / 参与贡献 hello-auditkit
 
-Thanks for contributing to Hello-AuditKit.
+Thanks for contributing! / 欢迎贡献！
 
-## Scope
+## Docs / 文档
 
-- Keep **runtime behavior** consistent with `hello-auditkit/SKILL.md`.
-- Prefer **evidence-first** rules: every reported issue should be verifiable (file + line).
-- Avoid adding checks that expand scope without a clear user request.
+- README (EN): `README.md`
+- README (中文): `README_CN.md`
+- Skill spec: `SKILL.md`
+- License: `LICENSE`
 
-## Development
+## How to contribute / 如何贡献
 
-- Keep changes small and reviewable.
-- If you add or change rules:
-  - Update the relevant registry/checklist under `hello-auditkit/references/`.
-  - Keep documentation and skill behavior aligned.
+1. Fork this repo
+2. Create a branch: `git checkout -b feat/your-change`
+3. Make changes (keep formatting consistent)
+4. Run any relevant scripts/tests (if present)
+5. Commit with Conventional Commits
+6. Open a Pull Request
 
-## Pull Requests
+## Commit message / 提交信息
 
-1. Fork the repo and create a feature branch.
-2. Make changes.
-3. Open a PR with:
-   - What changed
-   - Why it changed
-   - Any compatibility notes
+See `COMMIT_MESSAGE.md` for a bilingual commit template.
